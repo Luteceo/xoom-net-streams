@@ -8,7 +8,7 @@ namespace Vlingo.Xoom.Streams
 {
   public class SubscriptionController<T> : ISubscription
   {
-    internal static readonly AtomicInteger NextId = new(0);
+    internal static readonly AtomicInteger NextId = new AtomicInteger(0);
 
     private readonly Queue<T> _buffer;
     private readonly ISubscriber<T> _subscriber;
