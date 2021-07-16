@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vlingo.Xoom.Streams", "Vlingo.Xoom.Streams\Vlingo.Xoom.Streams.csproj", "{13D737BA-148B-4282-AA03-4587A97F6A75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vlingo.Xoom.Streams.Tests", "Vlingo.Xoom.Streams.Tests\Vlingo.Xoom.Streams.Tests.csproj", "{42BA9B03-43EB-430A-8C4A-16D9486082FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13D737BA-148B-4282-AA03-4587A97F6A75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13D737BA-148B-4282-AA03-4587A97F6A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13D737BA-148B-4282-AA03-4587A97F6A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13D737BA-148B-4282-AA03-4587A97F6A75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42BA9B03-43EB-430A-8C4A-16D9486082FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42BA9B03-43EB-430A-8C4A-16D9486082FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42BA9B03-43EB-430A-8C4A-16D9486082FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42BA9B03-43EB-430A-8C4A-16D9486082FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79D2599F-1F00-4458-8624-9D25E64498F4}
+	EndGlobalSection
+EndGlobal
