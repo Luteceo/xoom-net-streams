@@ -1,7 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Reactive.Streams" />
+		<None Remove="Source\" />
+		<None Remove="Snik\" />
+		<None Remove="Vlingo.Xoom.Actors" />
+		<None Remove="Snik\Test\" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Reactive.Streams" Version="1.0.2" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Source\" />
+		<Folder Include="Sink\" />
+		<Folder Include="Sink\Test\" />
+	</ItemGroup>
+	<Choose>
+		<When Condition="'$(Configuration)' == 'Debug With Project References'">
+		</When>
+		<Otherwise>
+			<ItemGroup>
+				<PackageReference Include="Vlingo.Xoom.Actors" Version="1.8.0" />
+			</ItemGroup>
+		</Otherwise>
+	</Choose>
 </Project>
