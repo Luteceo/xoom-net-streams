@@ -5,7 +5,7 @@ namespace Vlingo.Xoom.Streams.Tests
 {
   class RandomNumberOfElementsSource : Source<string>
   {
-    private readonly AtomicInteger _element = new(0);
+    private readonly AtomicInteger _element = new AtomicInteger(0);
     private readonly Random _count = new Random();
     private readonly int _total;
     private readonly bool _slow;
