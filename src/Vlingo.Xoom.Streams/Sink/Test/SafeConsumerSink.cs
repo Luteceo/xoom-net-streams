@@ -41,5 +41,16 @@ namespace Vlingo.Xoom.Streams.Sink.Test
     {
       _access.WriteUsing("ready", 1);
     }
+
+    public override void Terminate()
+    {
+      _access.WriteUsing("terminate", 1);
+    }
+
+    public override void WhenValue(T value)
+    {
+      _access.WriteUsing("value", 1);
+      _access.WriteUsing("values", value);
+    }
   }
 }

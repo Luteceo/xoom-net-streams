@@ -28,11 +28,11 @@ namespace Vlingo.Xoom.Streams.Tests
     {
     }
 
-    private TestSubscriber(int total, int cancelAfterElements) : this(null, total, cancelAfterElements)
+    public TestSubscriber(int total, int cancelAfterElements) : this(null, total, cancelAfterElements)
     {
     }
 
-    private TestSubscriber(Sink<T> sink, int total, int cancelAfterElements)
+    public TestSubscriber(Sink<T> sink, int total, int cancelAfterElements)
     {
       _sink = sink;
       _total = total;
@@ -43,7 +43,7 @@ namespace Vlingo.Xoom.Streams.Tests
 
     public void OnSubscribe(ISubscription subscription)
     {
-      if (_subscription == null)
+      if (_subscription != null)
       {
         subscription.Cancel();
         return;
@@ -53,23 +53,32 @@ namespace Vlingo.Xoom.Streams.Tests
       _access.WriteUsing("onSubscribe", 1);
       subscription.Request(_total);
 
-      if (_sink != null)
-        _sink.Ready();
+      _sink?.Ready();
     }
 
-    public void OnNext(T element)
+    public void OnNext(T value)
     {
-      throw new NotImplementedException();
+      _access.WriteUsing("onNext", 1);
+      _access.WriteUsing("values", value);
+
+      if (_onNextCount.Get() >= _cancelAfterElements && !_cancelled)
+      {
+        _subscription.Cancel();
+        _sink?.Terminate();
+        _cancelled = true;
+      }
+
+      _sink?.WhenValue(value);
     }
 
     public void OnError(Exception cause)
     {
-      throw new NotImplementedException();
     }
 
     public void OnComplete()
     {
-      throw new NotImplementedException();
+      _access.WriteUsing("onComplete", 1);
+      _sink?.Terminate();
     }
 
     public AccessSafely AfterCompleting(int times)
@@ -89,7 +98,7 @@ namespace Vlingo.Xoom.Streams.Tests
       _access.ReadingWith("onComplete", () => _onCompleteCount.Get());
 
       _access.ReadingWith("values", () => _values);
-      
+
       return _access;
     }
   }

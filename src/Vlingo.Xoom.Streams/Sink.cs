@@ -11,5 +11,7 @@ namespace Vlingo.Xoom.Streams
     }
 
     public abstract void Ready();
+    public abstract void Terminate();
+    public abstract void WhenValue(T value);
   }
 }

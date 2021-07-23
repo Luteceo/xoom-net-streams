@@ -40,8 +40,7 @@ namespace Vlingo.Xoom.Streams
     }
 
     public void Request(long maximum)
-    {      Console.WriteLine(nameof(Request));
-
+    {
       if (maximum <= 0)
       {
         var exception = new ArgumentException("Must be >=1 and <= Long Max Value.");

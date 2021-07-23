@@ -17,5 +17,15 @@ namespace Vlingo.Xoom.Streams.Snik
     {
       throw new NotImplementedException();
     }
+
+    public override void Terminate()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override void WhenValue(T value)
+    {
+      throw new NotImplementedException();
+    }
   }
 }
