@@ -6,7 +6,7 @@ namespace Vlingo.Xoom.Streams
 {
   public abstract class Source<T> where T : class
   {
-    static Source<T> Empty()
+    public static Source<T> Empty()
     {
       return new IterableSource<T>(new List<T>(0), false);
     }
@@ -14,6 +14,16 @@ namespace Vlingo.Xoom.Streams
     public static Source<T> Only(IEnumerable<T> elements)
     {
       return new IterableSource<T>(new List<T>(elements), false);
+    }
+
+    public static Source<T> With(IEnumerable<T> iterable)
+    {
+      return With(iterable, false);
+    }
+
+    private static Source<T> With(IEnumerable<T> iterable, bool slowIterable)
+    {
+      return new IterableSource<T>(iterable, slowIterable);
     }
 
     public abstract ICompletes<Elements<T>> Next();

@@ -17,5 +17,10 @@
       Values = values;
       Terminated = terminated;
     }
+
+    public T? ElementAt(int index)
+    {
+      return Values.Length == 0 ? null : Values[index];
+    }
   }
 }
