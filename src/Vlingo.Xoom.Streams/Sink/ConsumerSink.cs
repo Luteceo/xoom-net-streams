@@ -20,12 +20,13 @@ namespace Vlingo.Xoom.Streams.Snik
 
     public override void Terminate()
     {
-      throw new NotImplementedException();
+      _terminated = true;
     }
 
     public override void WhenValue(T value)
     {
-      throw new NotImplementedException();
+      if (!_terminated)
+        _consumer.Invoke(value);
     }
   }
 }
