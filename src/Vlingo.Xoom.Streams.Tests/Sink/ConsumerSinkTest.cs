@@ -6,7 +6,7 @@ namespace Vlingo.Xoom.Streams.Tests.Sink
 {
   public class ConsumerSinkTest
   {
-    private readonly StringBuilder _builder = new();
+    private readonly StringBuilder _builder = new StringBuilder();
 
     [Fact]
     public void TestThatSinkIsConsumed()
