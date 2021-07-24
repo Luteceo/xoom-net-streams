@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using Vlingo.Xoom.Actors.TestKit;
 using Vlingo.Xoom.Common;
 
@@ -7,9 +9,9 @@ namespace Vlingo.Xoom.Streams.Sink.Test
   public class SafeConsumerSink<T> : Sink<T> where T : class
   {
     private AccessSafely _access;
-    private readonly AtomicInteger _readyCount = new AtomicInteger(0);
-    private readonly AtomicInteger _terminateCount = new AtomicInteger(0);
-    private readonly AtomicInteger _valueCount = new AtomicInteger(0);
+    private readonly AtomicInteger _readyCount = new (0);
+    private readonly AtomicInteger _terminateCount = new (0);
+    private readonly AtomicInteger _valueCount = new (0);
 
     private readonly IList<T> _values = new List<T>();
 
@@ -36,6 +38,22 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
       return _access;
     }
+
+    public int AccessValueMustBe(string name, int expected)
+    {
+      Console.WriteLine(nameof(AccessValueMustBe));
+      var current = 0;
+      for (var tries = 0; tries < 10; ++tries)
+      {
+        var value = _access.ReadFrom<int>(name);
+        if (value >= expected) return value;
+        if (!current.Equals(value)) current = value;
+        Thread.Sleep(100);
+      }
+
+      return expected == 0 ? -1 : current;
+    }
+
 
     public override void Ready()
     {

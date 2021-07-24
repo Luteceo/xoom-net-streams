@@ -12,7 +12,7 @@ namespace Vlingo.Xoom.Streams
 
     private readonly Queue<T> _buffer;
     private readonly ISubscriber<T> _subscriber;
-    private readonly ControlledSubscription<T> _subscription;
+    private readonly IControlledSubscription<T> _subscription;
     private readonly PublisherConfiguration _configuration;
 
     private readonly int _id;
@@ -22,11 +22,11 @@ namespace Vlingo.Xoom.Streams
     public ISubscriber<T> Subscriber => _subscriber;
     public int Id => _id;
 
-    public SubscriptionController(ISubscriber<T> subscriber, ControlledSubscription<T> subscription,
+    public SubscriptionController(ISubscriber<T> subscriber, IControlledSubscription<T> subscription,
       PublisherConfiguration configuration)
     {
       _id = NextId.IncrementAndGet();
-      
+
       _subscriber = subscriber;
       _subscription = subscription;
       _configuration = configuration;
@@ -37,6 +37,13 @@ namespace Vlingo.Xoom.Streams
     public void Cancel()
     {
       _subscription.Cancel(this);
+    }
+
+    public void CancelSubscription()
+    {
+      _cancelled = true;
+      _count = 0;
+      _maximum = 0;
     }
 
     public void Request(long maximum)
@@ -67,12 +74,15 @@ namespace Vlingo.Xoom.Streams
       {
         switch (_configuration.OverflowPolicy)
         {
-          case Streams.OverflowPolicy.DROP_HEAD:
+          case Streams.OverflowPolicy.DropHead:
             DropHeadFor(element);
             break;
-          case Streams.OverflowPolicy.DROP_TAIL:
+          case Streams.OverflowPolicy.DropTail:
             DropTailFor(element);
             break;
+          case Streams.OverflowPolicy.DropCurrent: break;
+          default:
+            throw new ArgumentOutOfRangeException();
         }
       }
     }
@@ -83,24 +93,27 @@ namespace Vlingo.Xoom.Streams
 
     private void DropHeadFor(T element)
     {
+      _buffer.Dequeue();
+      _buffer.Enqueue(element);
     }
 
     private void SendNext(T element)
-    {     
+    {
       var throttleCount = ThrottleCount;
       var currentElement = element;
       while (throttleCount-- > 0)
       {
         var next = SwapBufferedOrElse(currentElement);
-        if (next == null)
-          break;
-        currentElement = default(T);
-        _subscriber.OnNext(next);
-        Incremental();
+        if (next != null)
+        {
+          currentElement = default(T);
+          _subscriber.OnNext(next);
+          Incremental();
+        }
       }
     }
 
-    private T SwapBufferedOrElse(T element)
+    private T? SwapBufferedOrElse(T? element)
     {
       if (!_buffer.Any())
         return element;
@@ -118,8 +131,21 @@ namespace Vlingo.Xoom.Streams
 
     private long Remaining => _cancelled ? 0 : _maximum - _count;
 
-    private long ThrottleCount => _configuration.MaxThrottle == Streams.DEFAULT_MAX_THROTTLE
+    private long ThrottleCount => _configuration.MaxThrottle == Streams.DefaultMaxThrottle
       ? Remaining
       : Math.Max(_configuration.MaxThrottle, Remaining);
+
+    public long Accumulate(long amount)
+    {
+      if (_maximum >= long.MaxValue)
+        return _maximum;
+      var accumulated = _maximum + amount;
+      return accumulated < 0 ? long.MaxValue : accumulated;
+    }
+
+    public void RequestFlow(long maximum)
+    {
+      _maximum = maximum;
+    }
   }
 }

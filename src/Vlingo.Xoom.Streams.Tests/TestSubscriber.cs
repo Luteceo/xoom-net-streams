@@ -10,16 +10,16 @@ namespace Vlingo.Xoom.Streams.Tests
   {
     private AccessSafely _access;
 
-    private readonly AtomicInteger _onSubscribeCount = new AtomicInteger(0);
-    private readonly AtomicInteger _onNextCount = new AtomicInteger(0);
-    private readonly AtomicInteger _onErrorCount = new AtomicInteger(0);
-    private readonly AtomicInteger _onCompleteCount = new AtomicInteger(0);
+    private readonly AtomicInteger _onSubscribeCount = new (0);
+    private readonly AtomicInteger _onNextCount = new (0);
+    private readonly AtomicInteger _onErrorCount = new (0);
+    private readonly AtomicInteger _onCompleteCount = new (0);
 
-    private readonly BlockingCollection<T> _values = new BlockingCollection<T>();
+    private readonly BlockingCollection<T> _values = new();
 
     private readonly Sink<T> _sink;
 
-    private bool _cancelled = false;
+    private bool _cancelled;
     private readonly int _cancelAfterElements;
     private readonly int _total;
     private ISubscription _subscription;
@@ -63,7 +63,7 @@ namespace Vlingo.Xoom.Streams.Tests
 
       if (_onNextCount.Get() >= _cancelAfterElements && !_cancelled)
       {
-        _subscription.Cancel();
+        _subscription?.Cancel();
         _sink?.Terminate();
         _cancelled = true;
       }
@@ -73,6 +73,8 @@ namespace Vlingo.Xoom.Streams.Tests
 
     public void OnError(Exception cause)
     {
+      _access.WriteUsing("onError", 1);
+      _sink?.Terminate();
     }
 
     public void OnComplete()
@@ -92,7 +94,7 @@ namespace Vlingo.Xoom.Streams.Tests
 
       _access.WritingWith("values", (T values) => _values.Add(values));
 
-      _access.ReadingWith("onSubscribe", () => _onCompleteCount.Get());
+      _access.ReadingWith("onSubscribe", () => _onSubscribeCount.Get());
       _access.ReadingWith("onNext", () => _onNextCount.Get());
       _access.ReadingWith("onError", () => _onErrorCount.Get());
       _access.ReadingWith("onComplete", () => _onCompleteCount.Get());
