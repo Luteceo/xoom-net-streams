@@ -15,7 +15,7 @@ namespace Vlingo.Xoom.Streams.Snik
 
     public override void Ready()
     {
-      throw new NotImplementedException();
+      // IGNORED
     }
 
     public override void Terminate()

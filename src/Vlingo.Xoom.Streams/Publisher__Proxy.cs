@@ -5,7 +5,7 @@ namespace Reactive.Streams
 {
   public class Publisher__Proxy<T> : IPublisher<T>
   {
-    private static readonly string _subscriptionRepresentation1 = "Subscribe(ISubscriber<T> subscriber)";
+    private const string SubscribeRepresentation1 = "Subscribe(ISubscriber<T>)";
     private readonly Actor _actor;
     private readonly IMailbox _mailbox;
 
@@ -20,12 +20,12 @@ namespace Reactive.Streams
       if (subscriber == null)
         throw new ArgumentNullException("Subscriber must not be null");
       if (_actor.IsStopped)
-        _actor.DeadLetters.FailedDelivery(new DeadLetter(_actor, _subscriptionRepresentation1));
+        _actor.DeadLetters?.FailedDelivery(new DeadLetter(_actor, SubscribeRepresentation1));
       else
       {
         Action<IPublisher<T>> consumer = (actor) => actor.Subscribe(subscriber);
-        if (_mailbox.IsPreallocated) _mailbox.Send(_actor, consumer, null, _subscriptionRepresentation1);
-        else _mailbox.Send(new LocalMessage<IPublisher<T>>(_actor, consumer, _subscriptionRepresentation1));
+        if (_mailbox.IsPreallocated) _mailbox.Send(_actor, consumer, null, SubscribeRepresentation1);
+        else _mailbox.Send(new LocalMessage<IPublisher<T>>(_actor, consumer, SubscribeRepresentation1));
       }
     }
   }

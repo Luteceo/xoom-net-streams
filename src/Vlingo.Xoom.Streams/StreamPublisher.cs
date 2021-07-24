@@ -4,27 +4,20 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams
 {
-  public class StreamPublisher<T> : Actor, IPublisher<T>, ControlledSubscription<T>, IScheduled<object>, IStoppable
+  public class StreamPublisher<T> : Actor, IPublisher<T>, IControlledSubscription<T>, IScheduled<object>, IStoppable
     where T : class
   {
     private readonly StreamPublisherDelegate<T> _delegate;
 
     public StreamPublisher(Source<T> source, PublisherConfiguration configuration)
     {
-      _delegate = new StreamPublisherDelegate<T>(source, configuration, SelfAs<ControlledSubscription<T>>(),
+      _delegate = new StreamPublisherDelegate<T>(source, configuration, SelfAs<IControlledSubscription<T>>(),
         Scheduler, SelfAs<IScheduled<object>>(), SelfAs<IStoppable>());
     }
 
     public void Cancel(SubscriptionController<T> subscription)
     {
       _delegate.Cancel(subscription);
-    }
-
-    public override void Stop()
-    {
-      _delegate.Stop();
-
-      base.Stop();
     }
 
     public void IntervalSignal(IScheduled<object> scheduled, object data)
@@ -40,6 +33,13 @@ namespace Vlingo.Xoom.Streams
     public void Subscribe(ISubscriber<T> subscriber)
     {
       _delegate.Subscribe(subscriber);
+    }
+
+    public override void Stop()
+    {
+      _delegate.Stop();
+
+      base.Stop();
     }
   }
 }

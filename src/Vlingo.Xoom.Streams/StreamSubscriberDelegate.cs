@@ -6,13 +6,14 @@ namespace Vlingo.Xoom.Streams
 {
   public class StreamSubscriberDelegate<T> : ISubscriber<T>
   {
-    private Sink<T> _sink;
-    private long _requestThreshold;
-    private ILogger _logger;
+    private readonly Sink<T> _sink;
+    private readonly long _requestThreshold;
+    private readonly ILogger _logger;
+
     private long _count;
     private bool _completed;
     private bool _errored;
-    private ISubscription _subscription;
+    private ISubscription? _subscription;
 
     public StreamSubscriberDelegate(Sink<T> sink, long requestThreshold, ILogger logger)
     {
@@ -22,33 +23,51 @@ namespace Vlingo.Xoom.Streams
       _count = 0;
       _completed = false;
       _errored = false;
+      _subscription = null;
     }
 
     public void OnSubscribe(ISubscription subscription)
     {
-      if (_subscription == null)
+      if (_subscription != null)
+        subscription.Cancel();
+      else
       {
         _subscription = subscription;
         _sink.Ready();
         _subscription.Request(_requestThreshold);
       }
-      else
-        subscription.Cancel();
     }
 
     public void OnComplete()
     {
-      //throw new NotImplementedException();
+      _completed = true;
+      Terminate();
+
+      _logger.Info($"Subscriber with {_sink} is completed.");
     }
 
     public void OnError(Exception cause)
     {
-      //throw new NotImplementedException();
+      _errored = true;
+      Terminate();
+
+      _logger.Error($"Subscriber with {_sink} is terminating because: {cause.Message}, {cause}");
     }
 
-    public void OnNext(T element)
+    public void OnNext(T value)
     {
-      //throw new NotImplementedException();
+      if (IsFinalized())
+        return;
+      _sink.WhenValue(value);
+      if (++_count >= _requestThreshold)
+        _subscription?.Request(_requestThreshold);
+    }
+
+    private bool IsFinalized() => _completed || _errored;
+
+    private void Terminate()
+    {
+      _sink.Terminate();
     }
   }
 }

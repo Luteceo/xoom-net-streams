@@ -7,11 +7,11 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams
 {
-  public class StreamPublisherDelegate<T> : IPublisher<T>, ControlledSubscription<T> where T : class
+  public class StreamPublisherDelegate<T> : IPublisher<T>, IControlledSubscription<T> where T : class
   {
     private Source<T> _source;
     private PublisherConfiguration _configuration;
-    private ControlledSubscription<T> _controlledSubscription;
+    private IControlledSubscription<T> _controlledSubscription;
     private Scheduler _scheduler;
     private IScheduled<object> _scheduled;
     private IStoppable _stoppable;
@@ -22,7 +22,7 @@ namespace Vlingo.Xoom.Streams
     private ICancellable _cancellable;
 
     public StreamPublisherDelegate(Source<T> source, PublisherConfiguration configuration,
-      ControlledSubscription<T> controlledSubscription, Scheduler scheduler,
+      IControlledSubscription<T> controlledSubscription, Scheduler scheduler,
       IScheduled<object> scheduled, IStoppable stoppable)
     {
       _source = source;
@@ -35,6 +35,31 @@ namespace Vlingo.Xoom.Streams
       _subscriptions = new Dictionary<int, SubscriptionController<T>>(2);
 
       DetermineIfSlow();
+    }
+
+    public void Subscribe(ISubscriber<T> subscriber)
+    {
+      Schedule(true);
+
+      var controller = new SubscriptionController<T>(subscriber, _controlledSubscription, _configuration);
+
+      if (!_subscriptions.ContainsKey(controller.Id))
+        _subscriptions.Add(controller.Id, controller);
+
+      subscriber.OnSubscribe(controller);
+    }
+
+    public void Cancel(SubscriptionController<T> controller)
+    {
+      controller.CancelSubscription();
+      _subscriptions.Remove(controller.Id);
+    }
+
+    public void Request(SubscriptionController<T> controller, long maximum)
+    {
+      controller.RequestFlow(controller.Accumulate(maximum));
+
+      Publish(controller, null);
     }
 
     internal void ProcessNext()
@@ -59,70 +84,42 @@ namespace Vlingo.Xoom.Streams
           }
 
           return maybeElements;
-        })
-        .Await();
+        });
     }
 
     private T[] Publish(T[] maybeElements)
     {
       if (maybeElements.Any())
       {
-        foreach (var controller in _subscriptions.Values.Select((value, idx) =>
-        { 
+        for (var idx = 0; idx < _subscriptions.Values.Count; idx++)
           Publish(maybeElements[idx]);
-          return value;
-        }));
       }
 
       return maybeElements;
     }
 
-    T Publish(T elementOrNull)
+    void Publish(T elementOrNull)
     {
-      foreach (var controller in _subscriptions.Values.Select(controller =>
-      {
+      foreach (var controller in _subscriptions.Values)
         controller.OnNext(elementOrNull);
-        return controller;
-      }));
-      return elementOrNull;
+    }
+
+    void Publish(SubscriptionController<T> controller, T elementOrNull)
+    {
+      controller.OnNext(elementOrNull);
     }
 
     private bool _flushed;
-
     private bool Flush()
     {
       _flushed = false;
-      foreach (var controller in _subscriptions.Values.Select(controller =>
+      foreach (var controller in _subscriptions.Values.Where(controller => controller.HasBufferedElements()))
       {
-        if (controller.HasBufferedElements())
-        {
-          controller.OnNext(null);
-          _flushed = true;
-        }
+        controller.OnNext(null);
+        _flushed = true;
+      }
 
-        return controller;
-      }));
       return _flushed;
-    }
-
-    public void Cancel(SubscriptionController<T> subscription)
-    {
-    }
-
-    public void Request(SubscriptionController<T> subscription, long maximum)
-    {
-    }
-
-    public void Subscribe(ISubscriber<T> subscriber)
-    {
-      Schedule(true);
-
-      var controller = new SubscriptionController<T>(subscriber, _controlledSubscription, _configuration);
-
-      if (!_subscriptions.ContainsKey(controller.Id))
-        _subscriptions.Add(controller.Id, controller);
-
-      subscriber.OnSubscribe(controller);
     }
 
     public void Stop()

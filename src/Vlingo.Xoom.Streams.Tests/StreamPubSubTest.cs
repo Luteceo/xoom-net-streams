@@ -7,7 +7,7 @@ namespace Vlingo.Xoom.Streams.Tests
   public abstract class StreamPubSubTest : IDisposable
   {
     protected PublisherConfiguration Configuration;
-    protected ControlledSubscription<string> ControlledSubscription;
+    protected IControlledSubscription<string> ControlledSubscription;
     protected Source<string> SourceOf123;
     protected Source<string> SourceOfABC;
     protected Source<string> SourceRandomNumberOfElements;
@@ -19,7 +19,7 @@ namespace Vlingo.Xoom.Streams.Tests
     {
       World = World.StartWithDefaults("streams");
 
-      Configuration = new PublisherConfiguration(5, Streams.OverflowPolicy.DROP_HEAD);
+      Configuration = new PublisherConfiguration(5, Streams.OverflowPolicy.DropHead);
 
       SourceOf123 = Source<string>.Only(new[] {"1", "2", "3"});
 
@@ -32,11 +32,11 @@ namespace Vlingo.Xoom.Streams.Tests
     {
       var definition = Definition.Has<StreamPublisher<T>>(Definition.Parameters(source, Configuration));
 
-      var protocols = World.ActorFor(new[] {typeof(IPublisher<T>), typeof(ControlledSubscription<T>)}, definition);
+      var protocols = World.ActorFor(new[] {typeof(IPublisher<T>), typeof(IControlledSubscription<T>)}, definition);
 
       Publisher = protocols.Get<IPublisher<string>>(0);
 
-      ControlledSubscription = protocols.Get<ControlledSubscription<string>>(1);
+      ControlledSubscription = protocols.Get<IControlledSubscription<string>>(1);
     }
 
     protected void CreateSubscriberWith<T>(Sink<T> sink, long requestThreshold) where T : class
