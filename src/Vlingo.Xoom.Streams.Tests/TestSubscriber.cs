@@ -10,12 +10,12 @@ namespace Vlingo.Xoom.Streams.Tests
   {
     private AccessSafely _access;
 
-    private readonly AtomicInteger _onSubscribeCount = new (0);
-    private readonly AtomicInteger _onNextCount = new (0);
-    private readonly AtomicInteger _onErrorCount = new (0);
-    private readonly AtomicInteger _onCompleteCount = new (0);
+    private readonly AtomicInteger _onSubscribeCount = new AtomicInteger(0);
+    private readonly AtomicInteger _onNextCount = new AtomicInteger(0);
+    private readonly AtomicInteger _onErrorCount = new AtomicInteger(0);
+    private readonly AtomicInteger _onCompleteCount = new AtomicInteger(0);
 
-    private readonly BlockingCollection<T> _values = new();
+    private readonly BlockingCollection<T> _values = new BlockingCollection<T>();
 
     private readonly Sink<T> _sink;
 
