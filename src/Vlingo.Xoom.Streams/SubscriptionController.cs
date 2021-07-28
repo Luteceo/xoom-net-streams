@@ -113,7 +113,7 @@ namespace Vlingo.Xoom.Streams
       }
     }
 
-    private T? SwapBufferedOrElse(T? element)
+    private T SwapBufferedOrElse(T element)
     {
       if (!_buffer.Any())
         return element;
