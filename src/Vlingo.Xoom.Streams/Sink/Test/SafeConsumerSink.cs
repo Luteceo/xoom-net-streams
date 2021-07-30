@@ -6,7 +6,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Sink.Test
 {
-  public class SafeConsumerSink<T> : Sink<T> where T : class
+  public class SafeConsumerSink<T> : Sink<T>
   {
     private AccessSafely _access;
     private readonly AtomicInteger _readyCount = new (0);
@@ -53,10 +53,10 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
       return expected == 0 ? -1 : current;
     }
-
-
+    
     public override void Ready()
-    {
+    {      Console.WriteLine($"G{GetType()} : { nameof(Ready)}");
+
       _access.WriteUsing("ready", 1);
     }
 
