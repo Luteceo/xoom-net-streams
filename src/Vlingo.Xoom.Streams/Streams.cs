@@ -25,7 +25,7 @@ namespace Vlingo.Xoom.Streams
           throw new ArgumentException("Logger is already set.");
         _logger = value;
       }
-      get => _logger ?? throw new ArgumentNullException("Logger is null.");
+      get => _logger ?? throw new ArgumentNullException($"Logger is null.");
     }
   }
 }
