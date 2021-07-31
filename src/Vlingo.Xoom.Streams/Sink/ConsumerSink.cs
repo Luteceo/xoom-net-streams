@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vlingo.Xoom.Streams.Snik
+namespace Vlingo.Xoom.Streams.Sink
 {
   public class ConsumerSink<T> : Sink<T>
   {
