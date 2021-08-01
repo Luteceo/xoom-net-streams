@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using Vlingo.Xoom.Streams.Source;
 using Xunit;
 
 namespace Vlingo.Xoom.Streams.Tests.Operator
 {
-  public class FlatMapperTest : IDisposable
+  public class FlatMapperTest
   {
     [Fact]
     public void TestThatPropagatesRecordsFormTheProvidedSource()
@@ -20,10 +19,6 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
 
       // THEN
       Assert.Equal(new[] {1L, 2L, 3L, 4L}, providedLongs.ToArray());
-    }
-
-    public void Dispose()
-    {
     }
   }
 }

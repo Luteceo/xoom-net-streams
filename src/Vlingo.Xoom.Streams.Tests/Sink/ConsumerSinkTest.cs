@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Vlingo.Xoom.Streams.Tests.Sink
 {
-  public class ConsumerSinkTest:IDisposable
+  public class ConsumerSinkTest
   {
     private readonly StringBuilder _builder = new();
 
@@ -37,13 +37,9 @@ namespace Vlingo.Xoom.Streams.Tests.Sink
 
       // WHEN
       sink.WhenValue("D");
-      
+
       // THEN
       Assert.Equal("ABC", _builder.ToString());
-    }
-    
-    public void Dispose()
-    {
     }
   }
 }

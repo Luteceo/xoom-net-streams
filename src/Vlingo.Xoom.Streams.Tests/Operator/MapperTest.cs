@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Vlingo.Xoom.Streams.Tests.Operator
 {
-  public class MapperTest : IDisposable
+  public class MapperTest
   {
     [Fact]
     public void TestThatMappersMaps()
@@ -53,10 +53,6 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
       Assert.Equal(1, results[0]);
       Assert.Equal(2, results[1]);
       Assert.Equal(3, results[2]);
-    }
-
-    public void Dispose()
-    {
     }
   }
 }

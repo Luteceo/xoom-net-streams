@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace Vlingo.Xoom.Streams.Tests.Operator
 {
-  public class FilterTest : IDisposable
+  public class FilterTest
   {
     [Fact]
     public void TestThatFilterFilters()
@@ -24,10 +23,6 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
       Assert.Equal("321", results[0]);
       Assert.Equal("123", results[1]);
       Assert.Equal("214", results[2]);
-    }
-
-    public void Dispose()
-    {
     }
   }
 }
