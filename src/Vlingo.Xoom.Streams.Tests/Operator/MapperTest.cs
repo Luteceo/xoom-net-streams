@@ -10,16 +10,13 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
     [Fact]
     public void TestThatMappersMaps()
     {
-      // GIVEN
       var mapper = Operator<string, int>.MapWith(int.Parse);
 
-      // WHEN
       var results = new List<int>();
       new[] {"123", "456", "789"}
         .ToList()
         .ForEach(digits => mapper.PerformInto(digits, number => results.Add(number)));
 
-      // THEN
       Assert.Equal(3, results.Count);
       Assert.Equal(123, results[0]);
       Assert.Equal(456, results[1]);
@@ -29,7 +26,6 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
     [Fact]
     public void TestThatMapperFlatMapsCollections()
     {
-      // GIVEN
       var list1 = new[] {"1", "2", "3"};
       var list2 = new[] {"4", "5", "6"};
       var list3 = new[] {"7", "8", "9"};
@@ -42,13 +38,11 @@ namespace Vlingo.Xoom.Streams.Tests.Operator
       Func<List<IEnumerable<string>>, IEnumerable<int>> mapper = (los) =>
         los.SelectMany(list => list.Select(int.Parse));
 
-      // WHEN
       var results = new List<int>();
       var flatMapper = Operator<List<IEnumerable<string>>, IEnumerable<int>>
         .MapWith(mapper);
       flatMapper.PerformInto(lists, (numbers) => results.AddRange(numbers));
 
-      // THEN
       Assert.Equal(9, results.Count);
       Assert.Equal(1, results[0]);
       Assert.Equal(2, results[1]);

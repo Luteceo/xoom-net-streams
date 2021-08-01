@@ -16,16 +16,13 @@ namespace Vlingo.Xoom.Streams.Tests
     [Fact]
     public void TestThatSubscriberSubscribes()
     {
-      // GIVEN
       CreatePublisherWith(SourceOfABC);
       CreateSubscriberWith(_sink, 2);
 
       var access = _sink.AfterCompleting(1);
-
-      // WHEN
+      
       Publisher.Subscribe(Subscriber);
-
-      // THEN
+      
       var subscriberCount = access.ReadFrom<int>("ready");
       Assert.Equal(1, subscriberCount);
     }
@@ -33,16 +30,13 @@ namespace Vlingo.Xoom.Streams.Tests
     [Fact(Skip = "WIP")]
     public void TestThatSubscriberFeedsSink()
     {
-      // GIVEN
       CreatePublisherWith(SourceOfABC);
       CreateSubscriberWith(_sink, 2);
 
       var access = _sink.AfterCompleting(5);
       
-      // WHEN
       Publisher.Subscribe(Subscriber);
       
-      // THEN
       var subscriberCount = access.ReadFrom<int>("ready");
       Assert.Equal(1, subscriberCount);
       var valueCount = _sink.AccessValueMustBe("value", 3);
@@ -51,7 +45,7 @@ namespace Vlingo.Xoom.Streams.Tests
       Assert.Equal(1, terminateCount);
       var values = access.ReadFrom<List<string>>("values");
       Assert.Equal(3, values.Count);
-      
+
       Assert.Equal("A", values[0]);
       Assert.Equal("B", values[1]);
       Assert.Equal("C", values[2]);
