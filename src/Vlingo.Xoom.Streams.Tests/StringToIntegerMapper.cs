@@ -8,8 +8,8 @@ namespace Vlingo.Xoom.Streams.Tests
   public class StringToIntegerMapper : Operator<string, int>
   {
     private AccessSafely _access = AccessSafely.AfterCompleting(0);
-    private readonly AtomicInteger _transformCount = new(0);
-    private readonly BlockingCollection<int> _values = new();
+    private readonly AtomicInteger _transformCount = new AtomicInteger(0);
+    private readonly BlockingCollection<int> _values = new BlockingCollection<int>();
 
     public override void PerformInto(string value, Action<int> consumer)
     {
