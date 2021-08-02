@@ -9,9 +9,9 @@ namespace Vlingo.Xoom.Streams.Sink.Test
   public class SafeConsumerSink<T> : Sink<T>
   {
     private AccessSafely _access;
-    private readonly AtomicInteger _readyCount = new (0);
-    private readonly AtomicInteger _terminateCount = new (0);
-    private readonly AtomicInteger _valueCount = new (0);
+    private readonly AtomicInteger _readyCount = new(0);
+    private readonly AtomicInteger _terminateCount = new(0);
+    private readonly AtomicInteger _valueCount = new(0);
 
     private readonly IList<T> _values = new List<T>();
 
@@ -53,10 +53,9 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
       return expected == 0 ? -1 : current;
     }
-    
-    public override void Ready()
-    {      Console.WriteLine($"G{GetType()} : { nameof(Ready)}");
 
+    public override void Ready()
+    {
       _access.WriteUsing("ready", 1);
     }
 

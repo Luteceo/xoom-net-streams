@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Source
 {
-  public class IterableSource<T> : Source<T> 
+  public class IterableSource<T> : Source<T>
   {
     private readonly IEnumerator<T> _iterator;
     private readonly bool _slowIterable;
@@ -17,7 +16,6 @@ namespace Vlingo.Xoom.Streams.Source
 
     public override ICompletes<Elements<T>> Next()
     {
-      Console.WriteLine($"G{GetType()} : {nameof(Next)}");
       if (!_iterator.MoveNext()) return Completes.WithSuccess(new Elements<T>(new T[0], false));
 
       var elements = new T[1];
