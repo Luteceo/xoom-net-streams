@@ -9,11 +9,11 @@
 
     public static Elements<T> Empty()
     {
-      return new(_empty as T[], false);
+      return new Elements<T>(_empty as T[], false);
     }
     public static Elements<T> Terminated()
     {
-      return new(_empty as T[], true);
+      return new Elements<T>(_empty as T[], true);
     }
 
     public Elements(T[] values, bool terminated)
@@ -29,7 +29,7 @@
 
     public static Elements<T> Of(T[] values)
     {
-      return new(values, false);
+      return new Elements<T>(values, false);
     }
   }
 }
