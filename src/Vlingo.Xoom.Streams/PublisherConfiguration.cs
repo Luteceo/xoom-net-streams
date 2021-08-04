@@ -14,11 +14,11 @@ namespace Vlingo.Xoom.Streams
     public readonly int ProbeInterval;
 
     public static PublisherConfiguration DefaultDropHead =>
-      new(DefaultProbeInterval, DefaultMaxThrottle, DefaultBufferSize,
+      new PublisherConfiguration(DefaultProbeInterval, DefaultMaxThrottle, DefaultBufferSize,
         OverflowPolicy.DropHead);
 
     public static PublisherConfiguration DefaultDropCurrent =>
-      new(DefaultProbeInterval, DefaultMaxThrottle, DefaultBufferSize,
+      new PublisherConfiguration(DefaultProbeInterval, DefaultMaxThrottle, DefaultBufferSize,
         OverflowPolicy.DropCurrent);
 
     public PublisherConfiguration(int probeInterval, int maxThrottle, int bufferSize, OverflowPolicy overflowPolicy)
