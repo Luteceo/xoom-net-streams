@@ -5,21 +5,11 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Remove="Reactive.Streams" />
-		<None Remove="Source\" />
-		<None Remove="Snik\" />
-		<None Remove="Vlingo.Xoom.Actors" />
-		<None Remove="Snik\Test\" />
-	</ItemGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Reactive.Streams" Version="1.0.2" />
 	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Source\" />
-		<Folder Include="Sink\" />
-		<Folder Include="Sink\Test\" />
-	</ItemGroup>
+	
 	<Choose>
 		<When Condition="'$(Configuration)' == 'Debug With Project References'">
 		</When>
