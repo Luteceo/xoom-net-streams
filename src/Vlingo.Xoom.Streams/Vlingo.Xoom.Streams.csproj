@@ -1,17 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
+
+		<IsPackable>true</IsPackable>
+		<PackageVersion>$(VlingoVersion)</PackageVersion>
+		<PackageId>Vlingo.Xoom.Streams</PackageId>
+		<Authors>Vlingo</Authors>
+		<Description>
+			The VLINGO XOOM platform SDK for Reactive Streams built on XOOM ACTORS.
+		</Description>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageProjectUrl>https://github.com/vlingo-net/xoom-net-streams</PackageProjectUrl>
+		<PackageIcon>vlingo-64x64.png</PackageIcon>
+		<RepositoryUrl>https://github.com/vlingo-net/xoom-net-streams</RepositoryUrl>
+		<Configurations>Debug;Release;Debug With Project References</Configurations>
 	</PropertyGroup>
-	
+	<ItemGroup>
+		<None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+		<None Include="..\..\vlingo-64x64.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Reactive.Streams" Version="1.0.2" />
 	</ItemGroup>
-	
 	<Choose>
 		<When Condition="'$(Configuration)' == 'Debug With Project References'">
+			<ItemGroup>
+				<ProjectReference Include="..\..\..\xoom-net-actors\src\Vlingo.Xoom.Actors\Vlingo.Xoom.Actors.csproj" />
+			</ItemGroup>
 		</When>
 		<Otherwise>
 			<ItemGroup>

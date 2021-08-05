@@ -9,9 +9,9 @@ namespace Vlingo.Xoom.Streams.Sink.Test
   public class SafeConsumerSink<T> : Sink<T>
   {
     private AccessSafely _access;
-    private readonly AtomicInteger _readyCount = new(0);
-    private readonly AtomicInteger _terminateCount = new(0);
-    private readonly AtomicInteger _valueCount = new(0);
+    private readonly AtomicInteger _readyCount = new AtomicInteger(0);
+    private readonly AtomicInteger _terminateCount = new AtomicInteger(0);
+    private readonly AtomicInteger _valueCount = new AtomicInteger(0);
 
     private readonly IList<T> _values = new List<T>();
 
