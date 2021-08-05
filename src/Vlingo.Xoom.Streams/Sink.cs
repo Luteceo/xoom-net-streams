@@ -1,5 +1,5 @@
 ﻿using System;
-using Vlingo.Xoom.Streams.Snik;
+using Vlingo.Xoom.Streams.Sink;
 
 namespace Vlingo.Xoom.Streams
 {

@@ -3,7 +3,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Source
 {
-  public class IterableSource<T> : Source<T> where T : class
+  public class IterableSource<T> : Source<T>
   {
     private readonly IEnumerator<T> _iterator;
     private readonly bool _slowIterable;
@@ -16,14 +16,11 @@ namespace Vlingo.Xoom.Streams.Source
 
     public override ICompletes<Elements<T>> Next()
     {
-      if (_iterator.MoveNext())
-      {
-        var elements = new T[1];
-        elements[0] = _iterator.Current;
-        return Completes.WithSuccess(new Elements<T>(elements, false));
-      }
+      if (!_iterator.MoveNext()) return Completes.WithSuccess(new Elements<T>(new T[0], false));
 
-      return Completes.WithSuccess(new Elements<T>(new T[0], false));
+      var elements = new T[1];
+      elements[0] = _iterator.Current;
+      return Completes.WithSuccess(new Elements<T>(elements, false));
     }
 
     public override ICompletes<Elements<T>> Next(int maximumElements)

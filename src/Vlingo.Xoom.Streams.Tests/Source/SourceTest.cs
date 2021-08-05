@@ -1,10 +1,8 @@
-using System;
 using System.Text;
-using Vlingo.Xoom.Actors;
 
 namespace Vlingo.Xoom.Streams.Tests.Source
 {
-  public class SourceTest : IDisposable
+  public class SourceTest
   {
     private readonly StringBuilder _builder = new();
 
@@ -25,10 +23,6 @@ namespace Vlingo.Xoom.Streams.Tests.Source
 
       var result = _builder.ToString();
       return result;
-    }
-
-    public void Dispose()
-    {
     }
   }
 }
