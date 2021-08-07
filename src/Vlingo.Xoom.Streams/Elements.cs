@@ -18,7 +18,7 @@
       Terminated = terminated;
     }
 
-    public T? ElementAt(int index)
+    public T ElementAt(int index)
     {
       return Values.Length == 0 ? default : Values[index];
     }

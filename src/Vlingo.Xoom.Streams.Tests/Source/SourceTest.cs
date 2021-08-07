@@ -4,7 +4,7 @@ namespace Vlingo.Xoom.Streams.Tests.Source
 {
   public class SourceTest
   {
-    private readonly StringBuilder _builder = new();
+    private readonly StringBuilder _builder = new StringBuilder();
 
     protected string StringFromSource(Source<string> source)
     {
