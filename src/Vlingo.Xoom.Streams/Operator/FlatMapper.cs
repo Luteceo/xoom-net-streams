@@ -33,7 +33,7 @@ namespace Vlingo.Xoom.Streams.Operator
         {
           foreach (var element in elements.Values)
             consumer.Invoke(element);
-          if (!elements.Terminated)
+          if (!elements.IsTerminated)
             PropagateSource(source, consumer);
         });
     }
