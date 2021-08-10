@@ -3,7 +3,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Source
 {
-  public class IterableSource<T> : Source<T> where T : class
+  public class IterableSource<T> : Source<T>
   {
     private readonly IEnumerator<T> _iterator;
     private readonly bool _slowIterable;

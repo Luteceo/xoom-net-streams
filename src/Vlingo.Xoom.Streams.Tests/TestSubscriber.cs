@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors.TestKit;
 using Vlingo.Xoom.Common;
@@ -10,10 +11,10 @@ namespace Vlingo.Xoom.Streams.Tests
   {
     private AccessSafely _access;
 
-    private readonly AtomicInteger _onSubscribeCount = new (0);
-    private readonly AtomicInteger _onNextCount = new (0);
-    private readonly AtomicInteger _onErrorCount = new (0);
-    private readonly AtomicInteger _onCompleteCount = new (0);
+    private readonly AtomicInteger _onSubscribeCount = new(0);
+    private readonly AtomicInteger _onNextCount = new(0);
+    private readonly AtomicInteger _onErrorCount = new(0);
+    private readonly AtomicInteger _onCompleteCount = new(0);
 
     private readonly BlockingCollection<T> _values = new();
 
@@ -49,6 +50,8 @@ namespace Vlingo.Xoom.Streams.Tests
         return;
       }
 
+      Console.WriteLine($"1: {GetType()}: {nameof(OnSubscribe)}");
+
       _subscription = subscription;
       _access.WriteUsing("onSubscribe", 1);
       subscription.Request(_total);
@@ -69,16 +72,19 @@ namespace Vlingo.Xoom.Streams.Tests
       }
 
       _sink?.WhenValue(value);
+      Console.WriteLine($"1: {GetType()}: {nameof(OnNext)}");
     }
 
     public void OnError(Exception cause)
     {
+      Console.WriteLine($"{GetType()} : {nameof(OnError)}");
       _access.WriteUsing("onError", 1);
       _sink?.Terminate();
     }
 
     public void OnComplete()
     {
+      Console.WriteLine($"{GetType()} : {nameof(OnComplete)}");
       _access.WriteUsing("onComplete", 1);
       _sink?.Terminate();
     }
@@ -92,7 +98,7 @@ namespace Vlingo.Xoom.Streams.Tests
       _access.WritingWith("onError", (int value) => _onErrorCount.AddAndGet(value));
       _access.WritingWith("onComplete", (int value) => _onCompleteCount.AddAndGet(value));
 
-      _access.WritingWith("values", (T values) => _values.Add(values));
+      _access.WritingWith("values", (T value) => _values.Add(value));
 
       _access.ReadingWith("onSubscribe", () => _onSubscribeCount.Get());
       _access.ReadingWith("onNext", () => _onNextCount.Get());
@@ -100,8 +106,24 @@ namespace Vlingo.Xoom.Streams.Tests
       _access.ReadingWith("onComplete", () => _onCompleteCount.Get());
 
       _access.ReadingWith("values", () => _values);
+      Console.WriteLine($"1: {GetType()}: {nameof(AfterCompleting)}: {times}");
 
       return _access;
+    }
+
+    public int AccessValueMustBe(string name, int expected)
+    {
+      var current = 0;
+      for (var tries = 0; tries < 10; ++tries)
+      {
+        var value = _access.ReadFrom<int>(name);
+        if (value >= expected) return value;
+        if (!current.Equals(value)) current = value;
+        
+        Thread.Sleep(100);
+      }
+
+      return expected == 0 ? -1 : 0;
     }
   }
 }

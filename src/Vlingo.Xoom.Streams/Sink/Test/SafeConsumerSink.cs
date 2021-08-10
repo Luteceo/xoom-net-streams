@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using Vlingo.Xoom.Actors.TestKit;
 using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Sink.Test
 {
-  public class SafeConsumerSink<T> : Sink<T> where T : class
+  public class SafeConsumerSink<T> : Sink<T>
   {
     private AccessSafely _access;
-    private readonly AtomicInteger _readyCount = new (0);
-    private readonly AtomicInteger _terminateCount = new (0);
-    private readonly AtomicInteger _valueCount = new (0);
+    private readonly AtomicInteger _readyCount = new(0);
+    private readonly AtomicInteger _terminateCount = new(0);
+    private readonly AtomicInteger _valueCount = new(0);
 
-    private readonly IList<T> _values = new List<T>();
+    private readonly BlockingCollection<T> _values = new();
 
     public SafeConsumerSink()
     {
@@ -41,7 +41,7 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
     public int AccessValueMustBe(string name, int expected)
     {
-      Console.WriteLine(nameof(AccessValueMustBe));
+      Console.WriteLine($"{GetType()}: {nameof(AccessValueMustBe)}");
       var current = 0;
       for (var tries = 0; tries < 10; ++tries)
       {
@@ -54,19 +54,24 @@ namespace Vlingo.Xoom.Streams.Sink.Test
       return expected == 0 ? -1 : current;
     }
 
-
     public override void Ready()
     {
+      Console.WriteLine($"{GetType()}: {nameof(Ready)}");
+
       _access.WriteUsing("ready", 1);
     }
 
     public override void Terminate()
     {
+      Console.WriteLine($"{GetType()}: {nameof(Terminate)}");
+
       _access.WriteUsing("terminate", 1);
     }
 
     public override void WhenValue(T value)
     {
+      Console.WriteLine($"{GetType()}: {nameof(WhenValue)}");
+
       _access.WriteUsing("value", 1);
       _access.WriteUsing("values", value);
     }

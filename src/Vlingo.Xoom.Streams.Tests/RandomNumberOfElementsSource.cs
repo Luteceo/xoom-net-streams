@@ -24,22 +24,38 @@ namespace Vlingo.Xoom.Streams.Tests
 
     public override ICompletes<Elements<string>> Next()
     {
-      throw new NotImplementedException();
+      var current = _element.Get();
+      if (current >= _total)
+        return Completes.WithSuccess(new Elements<string>(new string[0], true));
+
+      var next = RandomNumberOfElements(current);
+      for (var idx = 0; idx < next.Length; ++idx)
+        next[idx] = $"{_element.IncrementAndGet()}";
+
+      return Completes.WithSuccess(new Elements<string>(next, false));
+    }
+
+    private string[] RandomNumberOfElements(int current)
+    {
+      var bound = (current > _total - 10 && current < _total) ? (_total - current) : 7;
+      var number = _count.Next(bound);
+      var next = new string[number <= 0 ? 1 : number];
+      return next;
     }
 
     public override ICompletes<Elements<string>> Next(int maximumElements)
     {
-      throw new NotImplementedException();
+      return Next();
     }
 
     public override ICompletes<Elements<string>> Next(long index)
     {
-      throw new NotImplementedException();
+      return Next();
     }
 
     public override ICompletes<Elements<string>> Next(long index, int maximumElements)
     {
-      throw new NotImplementedException();
+      return Next();
     }
   }
 }

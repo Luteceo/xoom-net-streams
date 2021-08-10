@@ -13,6 +13,7 @@
 		<None Remove="Snik\Test\" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Nito.Collections.Deque" Version="1.1.0" />
 		<PackageReference Include="Reactive.Streams" Version="1.0.2" />
 	</ItemGroup>
 	<ItemGroup>
