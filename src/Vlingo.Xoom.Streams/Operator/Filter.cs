@@ -9,6 +9,10 @@ using System;
 
 namespace Vlingo.Xoom.Streams.Operator
 {
+    /// <summary>
+    /// Filters <see cref="Sink{T}"/> values and potentially produces <see cref="Source{T}"/> values.
+    /// </summary>
+    /// <typeparam name="T">The input and output type</typeparam>
     public class Filter<T> : Operator<T, T>
     {
         private readonly Predicate<T> _predicate;
