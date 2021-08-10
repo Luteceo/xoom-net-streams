@@ -4,7 +4,7 @@ using Vlingo.Xoom.Streams.Source;
 
 namespace Vlingo.Xoom.Streams
 {
-  public abstract class Source<T> 
+  public abstract class Source<T>
   {
     public static Source<T> Empty()
     {

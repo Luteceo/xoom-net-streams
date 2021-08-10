@@ -63,11 +63,16 @@ namespace Vlingo.Xoom.Streams
         _subscription?.Request(_requestThreshold);
     }
 
-    private bool IsFinalized() => _completed || _errored;
+    public bool IsFinalized() => _completed || _errored;
 
     private void Terminate()
     {
       _sink.Terminate();
+    }
+
+    public void CancelSubscription()
+    {
+      _subscription?.Cancel();
     }
   }
 }

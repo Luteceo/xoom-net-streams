@@ -7,7 +7,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams
 {
-  public class StreamPublisherDelegate<T> : IPublisher<T>, IControlledSubscription<T> where T : class
+  public class StreamPublisherDelegate<T> : IPublisher<T>, IControlledSubscription<T>
   {
     private Source<T> _source;
     private PublisherConfiguration _configuration;
@@ -39,6 +39,7 @@ namespace Vlingo.Xoom.Streams
 
     public void Subscribe(ISubscriber<T> subscriber)
     {
+      Console.WriteLine($"3: {GetType()} : {nameof(Subscribe)}");
       Schedule(true);
 
       var controller = new SubscriptionController<T>(subscriber, _controlledSubscription, _configuration);
@@ -57,43 +58,59 @@ namespace Vlingo.Xoom.Streams
 
     public void Request(SubscriptionController<T> controller, long maximum)
     {
+      Console.WriteLine($"{GetType()} : {nameof(Request)}");
+
       controller.RequestFlow(controller.Accumulate(maximum));
 
-      Publish(controller, null);
+      Publish(controller, default);
     }
 
     internal void ProcessNext()
     {
       if (!_subscriptions.Any())
         return;
-      _source
-        .Next()
-        .AndThen(maybeElements =>
-        {
-          if (!maybeElements.Terminated)
+      try
+      {
+        _source
+          .Next()
+          .AndThen(maybeElements =>
           {
-            Publish(maybeElements.Values);
-            Schedule(false);
+            if (!maybeElements.IsTerminated)
+            {
+              Publish(maybeElements.Values);
+              Schedule(false);
+              return maybeElements;
+            }
+            else
+            {
+              // if (Flush()) return maybeElements;
+              CompleteAll();
+              _stoppable.Stop();
+            }
+            
             return maybeElements;
-          }
-          else
-          {
-            if (Flush()) return maybeElements;
-            CompleteAll();
-            _stoppable.Stop();
-          }
+          })
+          .Await();
+      }
+      catch (Exception e)
+      {
+        Publish(e);
+      }
+    }
 
-          return maybeElements;
-        });
+    public void Publish(Exception cause)
+    {
+      foreach (var controller in _subscriptions.Values)
+        controller.OnError(cause);
     }
 
     private T[] Publish(T[] maybeElements)
     {
+      Console.WriteLine($"{GetType()} : T[] {nameof(Publish)}");
+
       if (maybeElements.Any())
-      {
-        for (var idx = 0; idx < _subscriptions.Values.Count; idx++)
+        for (var idx = 0; idx < _subscriptions.Values.Count; ++idx)
           Publish(maybeElements[idx]);
-      }
 
       return maybeElements;
     }
@@ -106,16 +123,20 @@ namespace Vlingo.Xoom.Streams
 
     void Publish(SubscriptionController<T> controller, T elementOrNull)
     {
+      Console.WriteLine($"{GetType()} : {nameof(Publish)}");
       controller.OnNext(elementOrNull);
     }
 
     private bool _flushed;
+
     private bool Flush()
     {
+      Console.WriteLine($"{GetType()} : {nameof(Flush)}");
+
       _flushed = false;
       foreach (var controller in _subscriptions.Values.Where(controller => controller.HasBufferedElements()))
       {
-        controller.OnNext(null);
+        controller.OnNext(default);
         _flushed = true;
       }
 
@@ -130,6 +151,8 @@ namespace Vlingo.Xoom.Streams
 
     private void CompleteAll()
     {
+      Console.WriteLine($"{GetType()} : {nameof(CompleteAll)}");
+
       foreach (var controller in _subscriptions.Values)
         controller.Subscriber.OnComplete();
 
@@ -146,9 +169,12 @@ namespace Vlingo.Xoom.Streams
       if (_slow)
         _cancellable = _scheduler.ScheduleOnce<object>(_scheduled, default, new TimeSpan(0),
           new TimeSpan(_configuration.ProbeInterval));
-      else if (isSubscribing && _cancellable == null)
-        _cancellable = _scheduler.Schedule<object>(_scheduled, default, new TimeSpan(0),
-          new TimeSpan(_configuration.ProbeInterval));
+      else
+      {
+        if (isSubscribing && _cancellable == null)
+          _cancellable = _scheduler.Schedule<object>(_scheduled, default, new TimeSpan(0),
+            new TimeSpan(_configuration.ProbeInterval));
+      }
     }
   }
 }
