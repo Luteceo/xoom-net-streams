@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Vlingo.Xoom.Streams.Sink;
 
 namespace Vlingo.Xoom.Streams
@@ -9,6 +10,8 @@ namespace Vlingo.Xoom.Streams
     {
       return new ConsumerSink<T>(consumer);
     }
+    
+    public static Sink<T> PrintTo(StreamWriter printStream, string prefix) => new PrintSink<T>(printStream, prefix);
 
     public abstract void Ready();
     public abstract void Terminate();

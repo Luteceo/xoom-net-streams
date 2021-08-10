@@ -44,7 +44,7 @@ namespace Vlingo.Xoom.Streams.Sink
         {
             if (!_terminated)
             {
-                _printStream.Write(_prefix + value);
+                _printStream.WriteLine(_prefix + value);
             }
         }
 
