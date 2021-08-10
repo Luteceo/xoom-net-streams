@@ -1,41 +1,50 @@
+// Copyright © 2012-2021 VLINGO LABS. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
 using System;
 
 namespace Vlingo.Xoom.Streams.Operator
 {
-  public class FlatMapper<T, R> : Operator<T, R>
-  {
-    private readonly Func<T, Source<R>> _mapper;
-    private const int MaximumBuffer = 32;
-
-    public FlatMapper(Func<T, Source<R>> mapper)
+    public class FlatMapper<T, TR> : Operator<T, TR>
     {
-      _mapper = mapper;
-    }
+        private readonly Func<T, Source<TR>> _mapper;
+        private const int MaximumBuffer = 32;
 
-    public override void PerformInto(T value, Action<R> consumer)
-    {
-      try
-      {
-        var result = _mapper.Invoke(value);
-        PropagateSource(result, consumer);
-      }
-      catch (Exception e)
-      {
-        Streams.Logger.Error($"FlatMapper failed because: {e.Message}", e);
-      }
-    }
+        public FlatMapper(Func<T, Source<TR>> mapper) => _mapper = mapper;
 
-    private static void PropagateSource(Source<R> source, Action<R> consumer)
-    {
-      source
-        .Next(MaximumBuffer)
-        .AndThenConsume(elements =>
+        public override void PerformInto(T value, Action<TR> consumer)
         {
-          foreach (var element in elements.Values)
-            consumer.Invoke(element);
-          if (!elements.IsTerminated)
-            PropagateSource(source, consumer);
-        });
+            try
+            {
+                var result = _mapper.Invoke(value);
+                PropagateSource(result, consumer);
+            }
+            catch (Exception e)
+            {
+                Streams.Logger.Error($"FlatMapper failed because: {e.Message}", e);
+            }
+        }
+
+        private static void PropagateSource(Source<TR> source, Action<TR> consumer)
+        {
+            source
+                .Next(MaximumBuffer)
+                .AndThenConsume(elements =>
+                {
+                    foreach (var element in elements.Values)
+                    {
+                        consumer.Invoke(element);
+                    }
+
+                    if (!elements.IsTerminated)
+                    {
+                        PropagateSource(source, consumer);
+                    }
+                });
+        }
     }
-  }
 }
