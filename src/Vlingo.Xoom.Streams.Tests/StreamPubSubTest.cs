@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 
@@ -28,7 +30,7 @@ namespace Vlingo.Xoom.Streams.Tests
       SourceRandomNumberOfElements = new RandomNumberOfElementsSource(100);
     }
 
-    protected void CreatePublisherWith<T>(Source<T> source) where T : class
+    protected void CreatePublisherWith<T>(Source<T> source)
     {
       var definition = Definition.Has<StreamPublisher<T>>(Definition.Parameters(source, Configuration));
 
@@ -39,13 +41,28 @@ namespace Vlingo.Xoom.Streams.Tests
       ControlledSubscription = protocols.Get<IControlledSubscription<string>>(1);
     }
 
-    protected void CreateSubscriberWith<T>(Sink<T> sink, long requestThreshold) where T : class
+    protected void CreateSubscriberWith<T>(Sink<T> sink, long requestThreshold)
     {
-      var protocols = World.ActorFor(new[] {typeof(ISubscriber<T>)}, typeof(StreamSubscriber<T>), sink, requestThreshold);
+      var protocols = World.ActorFor(new[] {typeof(ISubscriber<T>)}, typeof(StreamSubscriber<T>), sink,
+        requestThreshold);
 
       Subscriber = protocols.Get<ISubscriber<string>>(0);
       Publisher.Subscribe(Subscriber);
     }
+
+    protected ISubscriber<T> CreateSubscriberWithoutSubscribing<T>(Sink<T> sink, long requestThreshold)
+    {
+      var protocols = World.ActorFor(new[] {typeof(ISubscriber<T>)}, typeof(StreamSubscriber<T>), sink,
+        requestThreshold);
+
+      var subscriber = protocols.Get<ISubscriber<T>>(0);
+      return subscriber;
+    }
+
+    protected IEnumerable<string> StringListOf1To(int n) => Enumerable.Range(1, n)
+      .Select(idx => $"{idx}");
+
+    protected IEnumerable<int> IntegerListOf1To(int n) => Enumerable.Range(1, n);
 
     public void Dispose()
     {

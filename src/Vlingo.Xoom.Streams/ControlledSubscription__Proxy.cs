@@ -5,8 +5,8 @@ namespace Vlingo.Xoom.Streams
 {
   public class ControlledSubscription__Proxy<T> : IControlledSubscription<T>
   {
-    private const string RequestRepresentation1 = "Request(Vlingo.Xoom.Streams.SubscriptionController<T>, long)";
-    private const string CancelRepresentation2 = "Cancel(Vlingo.Xoom.Streams.SubscriptionController<T>)";
+    private const string RequestRepresentation1 = "Request(SubscriptionController<T>, long)";
+    private const string CancelRepresentation2 = "Cancel(SubscriptionController<T>)";
     private readonly Actor _actor;
     private readonly IMailbox _mailbox;
 
@@ -19,7 +19,7 @@ namespace Vlingo.Xoom.Streams
     public void Cancel(SubscriptionController<T> subscription)
     {
       if (subscription == null)
-        throw new ArgumentNullException("Subscription must not be null");
+        throw new ArgumentNullException(nameof(subscription), "Subscription must not be null");
       if (_actor.IsStopped)
         _actor.DeadLetters?.FailedDelivery(new DeadLetter(_actor, CancelRepresentation2));
       else
@@ -32,8 +32,9 @@ namespace Vlingo.Xoom.Streams
 
     public void Request(SubscriptionController<T> subscription, long maximum)
     {
+      Console.WriteLine($"G{GetType()} : { nameof(Request)}");
       if (subscription == null)
-        throw new ArgumentNullException("Subscription must not be null");
+        throw new ArgumentNullException(nameof(subscription), "Subscription must not be null");
       if (_actor.IsStopped)
         _actor.DeadLetters?.FailedDelivery(new DeadLetter(_actor, RequestRepresentation1));
       else

@@ -3,7 +3,7 @@ using Vlingo.Xoom.Actors;
 
 namespace Reactive.Streams
 {
-  public class IgnoreSubscriber__Proxy<T> : ISubscriber<T>
+  public class Subscriber__Proxy<T> : ISubscriber<T>
   {
     private const string OnSubscribeRepresentation1 = "OnSubscribe(ISubscription)";
     private const string OnCompleteRepresentation2 = "OnComplete()";
@@ -12,7 +12,7 @@ namespace Reactive.Streams
     private readonly Actor _actor;
     private readonly IMailbox _mailbox;
 
-    public IgnoreSubscriber__Proxy(Actor actor, IMailbox mailbox)
+    public Subscriber__Proxy(Actor actor, IMailbox mailbox)
     {
       _actor = actor;
       _mailbox = mailbox;

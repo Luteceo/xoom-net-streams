@@ -18,9 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Vlingo.Xoom.Streams\Vlingo.Xoom.Streams.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="vlingo-actors.json" />
-  </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="vlingo-actors.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
