@@ -21,12 +21,12 @@ namespace Vlingo.Xoom.Streams
         /// <summary>
         /// Zero or more element values.
         /// </summary>
-        public T[] Values { get; set; }
+        public T[] Values { get; }
         
         /// <summary>
         /// Bool <code>true</code> when the <see cref="Source{T}"/> has no more elements otherwise <code>false</code>
         /// </summary>
-        public bool IsTerminated { get; set; }
+        public bool IsTerminated { get; }
 
         /// <summary>
         /// Answer a new <see cref="Elements{T}"/> with no <code>values</code> but that is not <code>terminated</code>.
