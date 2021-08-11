@@ -6,9 +6,10 @@
 // one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 
-namespace Reactive.Streams
+namespace Vlingo.Xoom.Streams
 {
     public class Publisher__Proxy<T> : IPublisher<T>
     {
