@@ -5,7 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-using System.Diagnostics.Contracts;
+using System;
 using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Source
@@ -18,10 +18,23 @@ namespace Vlingo.Xoom.Streams.Source
 
         public LongRangeSource(long startInclusive, long endExclusive)
         {
-            Contract.Assert(startInclusive <= endExclusive);
-            Contract.Assert(startInclusive >= 0 && startInclusive <= long.MaxValue);
+            if (startInclusive > endExclusive)
+            {
+                throw new ArgumentOutOfRangeException(nameof(endExclusive),
+                    "End exclusive should be lesser than start Inclusive");
+            }
+            if (startInclusive < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startInclusive),
+                    "Start inclusive should not be lower than 0");
+            }
+            if (endExclusive < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(endExclusive),
+                    "End inclusive should not be lower than 0");
+            }
+            
             _startInclusive = startInclusive;
-            Contract.Assert(endExclusive >= 0 && endExclusive <= long.MaxValue);
             _endExclusive = endExclusive;
 
             _current = startInclusive;
