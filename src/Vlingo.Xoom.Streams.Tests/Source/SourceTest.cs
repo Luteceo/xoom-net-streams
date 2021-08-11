@@ -1,28 +1,35 @@
+// Copyright © 2012-2021 VLINGO LABS. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
 using System.Text;
 
 namespace Vlingo.Xoom.Streams.Tests.Source
 {
-  public class SourceTest
-  {
-    private readonly StringBuilder _builder = new StringBuilder();
-
-    protected string StringFromSource(Source<string> source)
+    public abstract class SourceTest
     {
-      string current = "";
-      while (current != null)
-      {
-        var elements = source
-          .Next()
-          .Await();
+        private readonly StringBuilder _builder = new StringBuilder();
 
-        current = elements.ElementAt(0);
+        protected string StringFromSource(Source<string> source)
+        {
+            var current = "";
+            while (current != null)
+            {
+                var elements = source
+                    .Next()
+                    .Await();
 
-        if (current != null)
-          _builder.Append(current);
-      }
+                current = elements.ElementAt(0);
 
-      var result = _builder.ToString();
-      return result;
+                if (current != null)
+                    _builder.Append(current);
+            }
+
+            var result = _builder.ToString();
+            return result;
+        }
     }
-  }
 }
