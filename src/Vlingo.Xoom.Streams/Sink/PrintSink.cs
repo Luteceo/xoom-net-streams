@@ -17,16 +17,16 @@ namespace Vlingo.Xoom.Streams.Sink
     /// <typeparam name="T">The type of the value to be printed</typeparam>
     public class PrintSink<T> : Sink<T>, IDisposable
     {
-        private readonly StreamWriter _printStream;
+        private readonly TextWriter _printStream;
         private readonly string _prefix;
         private bool _terminated;
         
         /// <summary>
         /// Constructs my default state.
         /// </summary>
-        /// <param name="printStream">The <see cref="StreamWriter"/> through which to print my values</param>
+        /// <param name="printStream">The <see cref="TextWriter"/> through which to print my values</param>
         /// <param name="prefix">The string used to begin each printed line</param>
-        public PrintSink(StreamWriter printStream, string prefix)
+        public PrintSink(TextWriter printStream, string prefix)
         {
             _printStream = printStream;
             _prefix = prefix;
