@@ -36,7 +36,7 @@ namespace Vlingo.Xoom.Streams
                 throw new ArgumentOutOfRangeException(nameof(probeInterval), "Probe interval should be positive");
             }
             
-            if (maxThrottle < 0)
+            if (maxThrottle < 0 && maxThrottle != DefaultMaxThrottle)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxThrottle), "Max throttle should be positive");
             }
