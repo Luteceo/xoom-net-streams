@@ -8,152 +8,162 @@ using Vlingo.Xoom.Streams.Sink;
 
 namespace Vlingo.Xoom.Streams
 {
-  public sealed class StreamProcessor<T, TR> : Actor, IProcessor<T, TR>, IControlledSubscription<TR>,
-    IScheduled<object>
-  {
-    private static StreamPublisherDelegate<TR> _publisherDelegate;
-    private static PublisherSource _publisherSource;
-    private static long _requestThreshold;
-    private static StreamSubscriberDelegate<T> _subscriberDelegate;
-
-    public StreamProcessor(Operator<T, TR> @operator, long requestThreshold, PublisherConfiguration configuration)
+    /// <summary>
+    /// A <see cref="StreamProcessor{T,TR}"/> implementation, where as a <see cref="StreamSubscriber{T}"/> I consume from an
+    /// upstream <see cref="StreamProcessor{T,TR}"/>, perform an operation on those signals using <see cref="Operator{T,TR}"/>,
+    /// and emit new signals via my own <see cref="StreamPublisher{T}"/>.
+    ///
+    /// My instances reuse <see cref="StreamSubscriberDelegate{T}"/> and <see cref="StreamPublisherDelegate{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type that the Subscriber side consumes</typeparam>
+    /// <typeparam name="TR">The type that the Publisher side emits</typeparam>
+    public sealed class StreamProcessor<T, TR> : Actor, IProcessor<T, TR>, IControlledSubscription<TR>, IScheduled<object>
     {
-      _requestThreshold = requestThreshold;
-      _subscriberDelegate =
-        new StreamSubscriberDelegate<T>(new ConsumerSink<T>(ConsumerOperator(@operator)), requestThreshold, Logger);
-      _publisherSource = new PublisherSource();
-      _publisherDelegate = new StreamPublisherDelegate<TR>(_publisherSource, configuration,
-        SelfAs<IControlledSubscription<TR>>(), Scheduler, SelfAs<IScheduled<object>>(),
-        SelfAs<IStoppable>());
-    }
+        private readonly StreamPublisherDelegate<TR> _publisherDelegate;
+        private readonly PublisherSource _publisherSource;
+        private readonly long _requestThreshold;
+        private readonly StreamSubscriberDelegate<T> _subscriberDelegate;
 
-    public void OnSubscribe(ISubscription subscription)
-    {
-      _subscriberDelegate.OnSubscribe(subscription);
-    }
-
-    public void OnNext(T value)
-    {
-      _subscriberDelegate.OnNext(value);
-    }
-
-    public void OnError(Exception cause)
-    {
-      _publisherDelegate.Publish(cause);
-      _subscriberDelegate.OnError(cause);
-
-      _publisherSource.Terminate();
-    }
-
-    public void OnComplete()
-    {
-      _subscriberDelegate.OnComplete();
-      _publisherSource.Terminate();
-    }
-
-    public void Subscribe(ISubscriber<TR> subscriber)
-    {
-      _publisherDelegate.Subscribe(subscriber);
-    }
-
-    public void Cancel(SubscriptionController<TR> controller)
-    {
-      _subscriberDelegate.CancelSubscription();
-      _publisherDelegate.Cancel(controller);
-    }
-
-    public void Request(SubscriptionController<TR> subscription, long maximum)
-    {
-      throw new NotImplementedException();
-    }
-
-    public void IntervalSignal(IScheduled<object> scheduled, object data)
-    {
-      _publisherDelegate.ProcessNext();
-    }
-
-    public override void Stop()
-    {
-      _publisherSource.Terminate();
-      base.Stop();
-    }
-
-    private class PublisherSource : Source<TR>
-    {
-      private bool _terminated;
-      private readonly Deque<TR> _values;
-
-      public PublisherSource()
-      {
-        _values = new Deque<TR>();
-        _terminated = false;
-      }
-
-      public override ICompletes<Elements<TR>> Next()
-      {
-        return Next((int) _requestThreshold);
-      }
-
-      public override ICompletes<Elements<TR>> Next(int maximumElements)
-      {
-        if (!_values.Any())
+        /// <summary>
+        /// Construct my default state with <paramref name="operator"/>, <paramref name="requestThreshold"/>, and <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="operator">The <see cref="Operator{T,TR}"/> that performs on an instance of <typeparamref name="T"/> to yield an instance of <typeparamref name="TR"/></param>
+        /// <param name="requestThreshold">The long number of signals accepted by my subscription</param>
+        /// <param name="configuration">The <see cref="PublisherConfiguration"/> used by my publisher</param>
+        public StreamProcessor(Operator<T, TR> @operator, long requestThreshold, PublisherConfiguration configuration)
         {
-          if (_subscriberDelegate.IsFinalized() || _terminated)
-            return Common.Completes.WithSuccess(Elements<TR>.Terminated());
-          return Common.Completes.WithSuccess(Elements<TR>.Empty());
+            _requestThreshold = requestThreshold;
+            _subscriberDelegate = new StreamSubscriberDelegate<T>(new ConsumerSink<T>(ConsumerOperator(@operator)), requestThreshold, Logger);
+            _publisherSource = new PublisherSource(this);
+            _publisherDelegate = new StreamPublisherDelegate<TR>(_publisherSource, configuration,
+                SelfAs<IControlledSubscription<TR>>(), Scheduler, SelfAs<IScheduled<object>>(),
+                SelfAs<IStoppable>());
         }
 
-        return Common.Completes.WithSuccess(Elements<TR>.Of(NextValue(maximumElements)));
-      }
+        //===================================
+        // Subscriber
+        //===================================
+        
+        public void OnSubscribe(ISubscription subscription) => _subscriberDelegate.OnSubscribe(subscription);
 
-      private TR[]? NextValue(int maximum)
-      {
-        var elements = Math.Min(_values.Count, maximum);
-        var nextValues = new object[elements] as TR[];
-        for (var idx = 0; idx < nextValues?.Length; ++idx)
+        public void OnNext(T value) => _subscriberDelegate.OnNext(value);
+
+        public void OnError(Exception cause)
         {
-          nextValues[idx] = _values.RemoveFromBack();
+            _publisherDelegate.Publish(cause);
+            _subscriberDelegate.OnError(cause);
+
+            _publisherSource.Terminate();
         }
 
-        return nextValues;
-      }
+        public void OnComplete()
+        {
+            _subscriberDelegate.OnComplete();
+            _publisherSource.Terminate();
+        }
 
-      public override ICompletes<Elements<TR>> Next(long index)
-      {
-        return Next((int) _requestThreshold);
-      }
+        //===================================
+        // Publisher
+        //===================================
+        
+        public void Subscribe(ISubscriber<TR> subscriber) => _publisherDelegate.Subscribe(subscriber);
 
-      public override ICompletes<Elements<TR>> Next(long index, int maximumElements)
-      {
-        return Next(maximumElements);
-      }
+        //===================================
+        // ControlledSubscription
+        //===================================
+        
+        public void Cancel(SubscriptionController<TR> controller)
+        {
+            _subscriberDelegate.CancelSubscription();
+            _publisherDelegate.Cancel(controller);
+        }
 
-      public override ICompletes<bool> IsSlow()
-      {
-        return Common.Completes.WithSuccess(false);
-      }
+        public void Request(SubscriptionController<TR> subscription, long maximum) => _publisherDelegate.Request(subscription, maximum);
 
-      public void Enqueue(TR value)
-      {
-        _values.AddToFront(value);
-      }
+        //===================================
+        // Scheduled
+        //===================================
+        
+        public void IntervalSignal(IScheduled<object> scheduled, object data) => _publisherDelegate.ProcessNext();
 
-      public void Terminate()
-      {
-        _terminated = true;
-      }
+        //===================================
+        // Stoppable
+        //===================================
+        
+        public override void Stop()
+        {
+            _publisherSource.Terminate();
+            base.Stop();
+        }
+
+        //===================================
+        // PublisherSource
+        //===================================
+        
+        private class PublisherSource : Source<TR>
+        {
+            private readonly StreamProcessor<T, TR> _streamProcessor;
+            private bool _terminated;
+            private readonly Deque<TR> _values;
+
+            public PublisherSource(StreamProcessor<T, TR> streamProcessor)
+            {
+                _streamProcessor = streamProcessor;
+                _values = new Deque<TR>();
+                _terminated = false;
+            }
+
+            public override ICompletes<Elements<TR>> Next() => Next((int)_streamProcessor._requestThreshold);
+
+            public override ICompletes<Elements<TR>> Next(int maximumElements)
+            {
+                if (!_values.Any())
+                {
+                    if (_streamProcessor._subscriberDelegate.IsFinalized() || _terminated)
+                        return Common.Completes.WithSuccess(Elements<TR>.Terminated());
+                    return Common.Completes.WithSuccess(Elements<TR>.Empty());
+                }
+
+                return Common.Completes.WithSuccess(Elements<TR>.Of(NextValue(maximumElements)!));
+            }
+
+            private TR[]? NextValue(int maximum)
+            {
+                var elements = Math.Min(_values.Count, maximum);
+                var nextValues = new object[elements] as TR[];
+                for (var idx = 0; idx < nextValues?.Length; ++idx) nextValues[idx] = _values.RemoveFromBack();
+
+                return nextValues;
+            }
+
+            public override ICompletes<Elements<TR>> Next(long index) => Next((int)_streamProcessor._requestThreshold);
+
+            public override ICompletes<Elements<TR>> Next(long index, int maximumElements) => Next(maximumElements);
+
+            public override ICompletes<bool> IsSlow() => Common.Completes.WithSuccess(false);
+
+            public void Enqueue(TR value) => _values.AddToFront(value);
+
+            public void Terminate() => _terminated = true;
+        }
+
+        //===================================
+        // ConsumerTransformer
+        //===================================
+        
+        private Action<T> ConsumerOperator(Operator<T, TR> @operator)
+        {
+            return delegate(T value)
+            {
+                try
+                {
+                    @operator.PerformInto(value, (transformed) => _publisherSource.Enqueue(transformed));
+                }
+                catch (Exception e)
+                {
+                    _publisherDelegate.Publish(e);
+                }
+            };
+        }
     }
-
-    private Action<T> ConsumerOperator(Operator<T, TR> @operator) => delegate(T value)
-    {
-      try
-      {
-        @operator.PerformInto(value, (transformed) => _publisherSource.Enqueue(transformed));
-      }
-      catch (Exception e)
-      {
-        _publisherDelegate.Publish(e);
-      }
-    };
-  }
 }
