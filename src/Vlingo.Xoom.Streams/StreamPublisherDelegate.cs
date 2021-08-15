@@ -56,7 +56,9 @@ namespace Vlingo.Xoom.Streams
             var controller = new SubscriptionController<T>(subscriber, _controlledSubscription, _configuration);
 
             if (!_subscriptions.ContainsKey(controller.Id))
+            {
                 _subscriptions.Add(controller.Id, controller);
+            }
 
             subscriber.OnSubscribe(controller);
         }
