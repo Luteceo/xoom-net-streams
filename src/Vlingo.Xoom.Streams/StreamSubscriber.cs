@@ -1,40 +1,33 @@
-﻿using System;
+﻿// Copyright © 2012-2021 VLINGO LABS. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
+using System;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 
 namespace Vlingo.Xoom.Streams
 {
-  /// <summary>
-  /// The standard <c>StreamSubscriber<T></c> of streams.
-  /// </summary>
-  /// <typeparam name="T">The type od value consumed</typeparam>
-  public class StreamSubscriber<T> : Actor, ISubscriber<T>, IStoppable
-  {
-    private readonly ISubscriber<T> _subscriber;
-
-    public StreamSubscriber(Sink<T> sink, long requestThreshold)
+    /// <summary>
+    /// The standard <see cref="ISubscriber{T}"/> of streams.
+    /// </summary>
+    /// <typeparam name="T">The type od value consumed</typeparam>
+    public class StreamSubscriber<T> : Actor, ISubscriber<T>, IStoppable
     {
-      _subscriber = new StreamSubscriberDelegate<T>(sink, requestThreshold, Logger);
-    }
+        private readonly ISubscriber<T> _subscriber;
 
-    public void OnComplete()
-    {
-      _subscriber.OnComplete();
-    }
+        public StreamSubscriber(Sink<T> sink, long requestThreshold) => 
+            _subscriber = new StreamSubscriberDelegate<T>(sink, requestThreshold, Logger);
 
-    public void OnError(Exception cause)
-    {
-      _subscriber.OnError(cause);
-    }
+        public void OnComplete() => _subscriber.OnComplete();
 
-    public void OnNext(T element)
-    {
-      _subscriber.OnNext(element);
-    }
+        public void OnError(Exception cause) => _subscriber.OnError(cause);
 
-    public void OnSubscribe(ISubscription subscription)
-    {
-      _subscriber.OnSubscribe(subscription);
+        public void OnNext(T element) => _subscriber.OnNext(element);
+
+        public void OnSubscribe(ISubscription subscription) => _subscriber.OnSubscribe(subscription);
     }
-  }
 }
