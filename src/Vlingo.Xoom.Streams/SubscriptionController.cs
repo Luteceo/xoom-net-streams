@@ -36,13 +36,6 @@ namespace Vlingo.Xoom.Streams
 
         public void Cancel() => _subscription.Cancel(this);
 
-        public void CancelSubscription()
-        {
-            _cancelled = true;
-            _count = 0;
-            _maximum = 0;
-        }
-
         public void Request(long maximum)
         {
             Console.WriteLine($"{GetType()} : {nameof(Request)}");
@@ -55,14 +48,38 @@ namespace Vlingo.Xoom.Streams
 
             _subscription.Request(this, maximum);
         }
+        
+        public override int GetHashCode() => 31 * Id.GetHashCode();
+        
+        public override bool Equals(object? other)
+        {
+            if (this == other)
+            {
+                return true;
+            }
+
+            if (other == null || GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return Id == ((SubscriptionController<T>) other).Id;
+        }
+        
+        public override string ToString() => 
+            $"SubscriptionController [id={Id} count={_count} maximum={_maximum} remaining={Remaining} unbounded={Unbounded}]";
+
+        //===================================
+        // Publish
+        //===================================
 
         internal bool HasBufferedElements() => _buffer.Any();
 
         internal void OnNext(T element)
         {
-            Console.WriteLine($"Element: {element} : Remaining:{Remaining}");
+            Console.WriteLine($"SubscriptionController | Element: {element} : Remaining: {Remaining}");
 
-            Console.WriteLine($"{GetType()} : {nameof(OnNext)}");
+            //Console.WriteLine($"{GetType()} : {nameof(OnNext)}");
             if (Remaining > 0)
             {
                 SendNext(element);
@@ -73,7 +90,7 @@ namespace Vlingo.Xoom.Streams
             }
             else if (_buffer.Count < _configuration.BufferSize)
             {
-                _buffer.AddToFront(element);
+                _buffer.AddToBack(element);
             }
             else
             {
@@ -89,30 +106,41 @@ namespace Vlingo.Xoom.Streams
                 }
             }
         }
-
-        private void DropTailFor(T element)
-        {
-            _dropIndex = 0;
-            var lastElement = _buffer.Count - 1;
-            _buffer.ToList().RemoveAll(e => _dropIndex++ == lastElement);
-            _buffer.AddToFront(element);
-        }
+        
+        public void OnError(Exception cause) => _subscriber.OnError(cause);
 
         private void DropHeadFor(T element)
         {
             _buffer.RemoveFromFront();
-            _buffer.AddToFront(element);
+            _buffer.AddToBack(element);
         }
-
+        
+        private void DropTailFor(T element)
+        {
+            _dropIndex = 0;
+            var lastElement = _buffer.Count - 1;
+            foreach (var el in _buffer)
+            {
+                if (_dropIndex++ == lastElement)
+                {
+                    _buffer.Remove(el);
+                }
+            }
+            _buffer.AddToBack(element);
+        }
+        
         private void SendNext(T element)
         {
+            Console.WriteLine($"SubscriptionController | REMAINING: {Remaining}");
             var throttleCount = ThrottleCount;
+            Console.WriteLine($"SubscriptionController | THROTTLE: {throttleCount}");
             var currentElement = element;
             while (throttleCount-- > 0)
             {
                 var next = SwapBufferedOrElse(currentElement);
                 if (next != null)
                 {
+                    Console.WriteLine($"SENDING: {next}");
                     currentElement = default;
                     _subscriber.OnNext(next);
                     Increment();
@@ -123,7 +151,7 @@ namespace Vlingo.Xoom.Streams
                 }
             }
         }
-
+        
         private T SwapBufferedOrElse(T element)
         {
             if (!_buffer.Any())
@@ -134,12 +162,51 @@ namespace Vlingo.Xoom.Streams
             var next = _buffer.RemoveFromFront();
             if (element != null)
             {
-                _buffer.AddToFront(element);
+                _buffer.AddToBack(element);
             }
 
             return next;
         }
+        
+        //===================================
+        // Back pressure
+        //===================================
+        
+        public long Accumulate(long amount)
+        {
+            if (_maximum < long.MaxValue)
+            {
+                var accumulated = _maximum + amount;
+                if (accumulated < 0)
+                {
+                    accumulated = long.MaxValue;
+                }
 
+                Console.WriteLine($"SubscriptionController | ACCUMULATE: CURRENT MAXIMUM: {_maximum} AMOUNT: {amount} ACCUMULATED: {accumulated}");
+                return accumulated;
+            }
+
+            return _maximum;
+        }
+        
+        public void CancelSubscription()
+        {
+            _cancelled = true;
+            _count = 0;
+            _maximum = 0;
+        }
+        
+        public void RequestFlow(long maximum)
+        {
+            Console.WriteLine($"{GetType()} : {nameof(RequestFlow)}");
+
+            //  NOTE: Since Accumulate() works as follows:
+            //  long accumulated = maximum + amount;
+            //  it means that resetting count must NOT be done:
+            //  _count = 0;
+            _maximum = maximum;
+        }
+        
         private void Increment()
         {
             if (_count < _maximum)
@@ -147,29 +214,13 @@ namespace Vlingo.Xoom.Streams
                 ++_count;
             }
         }
-
+        
         private long Remaining => _cancelled ? 0 : _maximum - _count;
 
         private long ThrottleCount => _configuration.MaxThrottle == Streams.DefaultMaxThrottle
             ? Remaining
             : Math.Min(_configuration.MaxThrottle, Remaining);
-
-        public long Accumulate(long amount)
-        {
-            if (_maximum >= long.MaxValue) return _maximum;
-
-            var accumulated = _maximum + amount;
-            if (accumulated < 0) accumulated = long.MaxValue;
-            return accumulated;
-        }
-
-        public void RequestFlow(long maximum)
-        {
-            Console.WriteLine($"{GetType()} : {nameof(RequestFlow)}");
-
-            _maximum = maximum;
-        }
-
-        public void OnError(Exception cause) => _subscriber.OnError(cause);
+        
+        private bool Unbounded => _maximum == long.MaxValue;
     }
 }
