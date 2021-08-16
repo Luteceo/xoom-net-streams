@@ -26,7 +26,7 @@ namespace Vlingo.Xoom.Streams
         private readonly Dictionary<int, SubscriptionController<T>> _subscriptions;
 
         private bool _slow;
-        private ICancellable _cancellable;
+        private ICancellable? _cancellable;
 
         public StreamPublisherDelegate(Source<T> source, PublisherConfiguration configuration,
             IControlledSubscription<T> controlledSubscription, Scheduler scheduler,
@@ -40,6 +40,8 @@ namespace Vlingo.Xoom.Streams
             _stoppable = stoppable;
 
             _subscriptions = new Dictionary<int, SubscriptionController<T>>(2);
+
+            _cancellable = null;
 
             DetermineIfSlow();
         }
@@ -75,11 +77,11 @@ namespace Vlingo.Xoom.Streams
 
         public void Request(SubscriptionController<T> controller, long maximum)
         {
-            Console.WriteLine($"{GetType()} : {nameof(Request)}");
+            Console.WriteLine($"StreamPublisherDelegate.{nameof(Request)} | SubscriptionController: {controller}");
 
             controller.RequestFlow(controller.Accumulate(maximum));
 
-            Publish(controller, default);
+            Publish(controller, default!);
         }
 
         //===================================
@@ -89,7 +91,10 @@ namespace Vlingo.Xoom.Streams
         internal void ProcessNext()
         {
             if (!_subscriptions.Any())
+            {
                 return;
+            }
+
             try
             {
                 _source
@@ -98,16 +103,20 @@ namespace Vlingo.Xoom.Streams
                     {
                         if (!maybeElements.IsTerminated)
                         {
+                            Console.WriteLine($"StreamPublisherDelegate PROCESS NEXT: ELEMENTS: {maybeElements}");
                             Publish(maybeElements.Values);
                             Schedule(false);
                             return maybeElements;
                         }
-                        else
+
+                        if (Flush())
                         {
-                            // if (Flush()) return maybeElements;
-                            CompleteAll();
-                            _stoppable.Stop();
+                            return maybeElements;
                         }
+
+                        Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
+                        CompleteAll();
+                        _stoppable.Stop();
 
                         return maybeElements;
                     })
@@ -129,7 +138,7 @@ namespace Vlingo.Xoom.Streams
 
         private T[] Publish(T[] maybeElements)
         {
-            Console.WriteLine($"{GetType()} : T[] {nameof(Publish)}");
+            Console.WriteLine($"StreamPublisherDelegate T[] {nameof(Publish)} | maybeElements: {string.Join(", ", maybeElements)}");
 
             if (maybeElements.Any())
             {
@@ -152,7 +161,7 @@ namespace Vlingo.Xoom.Streams
 
         private void Publish(SubscriptionController<T> controller, T elementOrNull)
         {
-            Console.WriteLine($"{GetType()} : {nameof(Publish)}");
+            Console.WriteLine($"StreamPublisherDelegate.{nameof(Publish)} | SubscriptionController: {controller}");
             controller.OnNext(elementOrNull);
         }
 
@@ -160,12 +169,12 @@ namespace Vlingo.Xoom.Streams
 
         private bool Flush()
         {
-            Console.WriteLine($"{GetType()} : {nameof(Flush)}");
+            Console.WriteLine($"StreamPublisherDelegate.{nameof(Flush)}");
 
             _flushed = false;
             foreach (var controller in _subscriptions.Values.Where(controller => controller.HasBufferedElements()))
             {
-                controller.OnNext(default);
+                controller.OnNext(default!);
                 _flushed = true;
             }
 
@@ -174,16 +183,18 @@ namespace Vlingo.Xoom.Streams
 
         public void Stop()
         {
-            _cancellable.Cancel();
+            _cancellable?.Cancel();
             CompleteAll();
         }
 
         private void CompleteAll()
         {
-            Console.WriteLine($"{GetType()} : {nameof(CompleteAll)}");
+            Console.WriteLine($"StreamPublisherDelegate.{nameof(CompleteAll)}");
 
             foreach (var controller in _subscriptions.Values)
+            {
                 controller.Subscriber.OnComplete();
+            }
 
             _subscriptions.Clear();
         }
@@ -194,13 +205,13 @@ namespace Vlingo.Xoom.Streams
         {
             if (_slow)
             {
-                _cancellable = _scheduler.ScheduleOnce<object>(_scheduled, default, new TimeSpan(0),
+                _cancellable = _scheduler.ScheduleOnce(_scheduled, default!, new TimeSpan(0),
                     new TimeSpan(_configuration.ProbeInterval));
             }
             else
             {
                 if (isSubscribing && _cancellable == null)
-                    _cancellable = _scheduler.Schedule<object>(_scheduled, default, new TimeSpan(0),
+                    _cancellable = _scheduler.Schedule(_scheduled, default!, new TimeSpan(0),
                         new TimeSpan(_configuration.ProbeInterval));
             }
         }
