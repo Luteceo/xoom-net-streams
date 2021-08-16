@@ -32,7 +32,8 @@ namespace Vlingo.Xoom.Streams
         
         public void Request(SubscriptionController<T> subscription, long maximum)
         {
-            Console.WriteLine($"{GetType()} : {nameof(Request)}");
+            //Console.WriteLine($"{GetType()} : {nameof(Request)}");
+            Console.WriteLine($"StreamPublisher.Request | SubscriptionController: {subscription}, maximum: {maximum}");
             _delegate.Request(subscription, maximum);
         }
         
@@ -44,7 +45,7 @@ namespace Vlingo.Xoom.Streams
         
         public void Subscribe(ISubscriber<T> subscriber)
         {
-            Console.WriteLine($"2: {GetType()} : {nameof(Subscribe)}");
+            Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
             if (subscriber != null)
             {
                 _delegate.Subscribe(subscriber);

@@ -14,7 +14,7 @@ namespace Vlingo.Xoom.Streams.Operator
     public abstract class QueueSource<T> : Source<T>
     {
         private readonly Queue<T> _queue;
-        private bool _slow;
+        private readonly bool _slow;
         private bool _terminated;
 
         public QueueSource(bool slow)

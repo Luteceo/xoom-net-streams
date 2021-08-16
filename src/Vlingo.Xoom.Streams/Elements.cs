@@ -5,6 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
+using System;
 using System.Linq;
 
 namespace Vlingo.Xoom.Streams
@@ -16,7 +17,7 @@ namespace Vlingo.Xoom.Streams
     /// <typeparam name="T">The type of element value</typeparam>
     public class Elements<T>
     {
-        private static readonly object[] _empty = new object[0];
+        private static readonly object[] _empty = Array.Empty<object>();
 
         /// <summary>
         /// Zero or more element values.

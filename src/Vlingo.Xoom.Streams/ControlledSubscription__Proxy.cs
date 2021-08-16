@@ -43,7 +43,7 @@ namespace Vlingo.Xoom.Streams
 
         public void Request(SubscriptionController<T> subscription, long maximum)
         {
-            Console.WriteLine($"G{GetType()} : {nameof(Request)}");
+            Console.WriteLine($"{GetType()} : {nameof(Request)}");
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription), "Subscription must not be null");
             if (_actor.IsStopped)

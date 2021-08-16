@@ -16,9 +16,9 @@ using Vlingo.Xoom.Streams.Sink;
 namespace Vlingo.Xoom.Streams
 {
     /// <summary>
-    /// A <see cref="StreamProcessor{T,TR}"/> implementation, where as a <see cref="StreamSubscriber{T}"/> I consume from an
-    /// upstream <see cref="StreamProcessor{T,TR}"/>, perform an operation on those signals using <see cref="Operator{T,TR}"/>,
-    /// and emit new signals via my own <see cref="StreamPublisher{T}"/>.
+    /// A <see cref="IProcessor{T1,T2}"/> implementation, where as a <see cref="ISubscriber{T}"/> I consume from an
+    /// upstream <see cref="IPublisher{T}"/>, perform an operation on those signals using <see cref="Operator{T,TR}"/>,
+    /// and emit new signals via my own <see cref="IPublisher{T}"/>.
     ///
     /// My instances reuse <see cref="StreamSubscriberDelegate{T}"/> and <see cref="StreamPublisherDelegate{T}"/>.
     /// </summary>
@@ -127,7 +127,10 @@ namespace Vlingo.Xoom.Streams
                 if (!_values.Any())
                 {
                     if (_streamProcessor._subscriberDelegate.IsFinalized() || _terminated)
+                    {
                         return Common.Completes.WithSuccess(Elements<TR>.Terminated());
+                    }
+
                     return Common.Completes.WithSuccess(Elements<TR>.Empty());
                 }
 
@@ -138,7 +141,7 @@ namespace Vlingo.Xoom.Streams
             {
                 var elements = Math.Min(_values.Count, maximum);
                 var nextValues = new object[elements] as TR[];
-                for (var idx = 0; idx < nextValues?.Length; ++idx) nextValues[idx] = _values.RemoveFromBack();
+                for (var idx = 0; idx < nextValues?.Length; ++idx) nextValues[idx] = _values.RemoveFromFront();
 
                 return nextValues;
             }
@@ -149,7 +152,7 @@ namespace Vlingo.Xoom.Streams
 
             public override ICompletes<bool> IsSlow() => Common.Completes.WithSuccess(false);
 
-            public void Enqueue(TR value) => _values.AddToFront(value);
+            public void Enqueue(TR value) => _values.AddToBack(value);
 
             public void Terminate() => _terminated = true;
         }
@@ -164,7 +167,7 @@ namespace Vlingo.Xoom.Streams
             {
                 try
                 {
-                    @operator.PerformInto(value, (transformed) => _publisherSource.Enqueue(transformed));
+                    @operator.PerformInto(value, transformed => _publisherSource.Enqueue(transformed));
                 }
                 catch (Exception e)
                 {
