@@ -25,7 +25,7 @@ namespace Vlingo.Xoom.Streams.Source
         {
             if (!_iterator.MoveNext())
             {
-                return Completes.WithSuccess(new Elements<T>(new T[0], false));
+                return Completes.WithSuccess(new Elements<T>(new T[0], true));
             }
 
             var elements = new T[1];
