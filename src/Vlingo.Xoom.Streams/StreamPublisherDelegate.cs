@@ -106,17 +106,17 @@ namespace Vlingo.Xoom.Streams
                             Console.WriteLine($"StreamPublisherDelegate PROCESS NEXT: ELEMENTS: {maybeElements}");
                             Publish(maybeElements.Values);
                             Schedule(false);
-                            return;
                         }
-
-                        if (Flush())
+                        else if (Flush())
                         {
-                            return;
+                            // nothing to do
                         }
-
-                        Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
-                        CompleteAll();
-                        _stoppable.Stop();
+                        else
+                        {
+                            Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
+                            CompleteAll();
+                            _stoppable.Stop();
+                        }
                     });
             }
             catch (Exception e)

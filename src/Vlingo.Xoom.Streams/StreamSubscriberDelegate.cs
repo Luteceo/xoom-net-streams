@@ -65,16 +65,14 @@ namespace Vlingo.Xoom.Streams
 
         public void OnNext(T value)
         {
-            if (IsFinalized())
+            if (!IsFinalized())
             {
-                return;
-            }
-
-            _sink.WhenValue(value);
+                _sink.WhenValue(value);
             
-            if (++_count >= _requestThreshold)
-            {
-                _subscription?.Request(_requestThreshold);
+                if (++_count >= _requestThreshold)
+                {
+                    _subscription?.Request(_requestThreshold);
+                }
             }
         }
 
