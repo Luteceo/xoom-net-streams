@@ -5,11 +5,13 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Reactive.Streams;
 using Vlingo.Xoom.Streams.Sink.Test;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Vlingo.Xoom.Streams.Tests
 {
@@ -23,6 +25,7 @@ namespace Vlingo.Xoom.Streams.Tests
         {
             CreatePublisherWith(SourceOf123);
             var access = _transformer.AfterCompleting(6);
+            var accessSink = _sink.AfterCompleting(12);
             var subscriber = CreateSubscriberWithoutSubscribing(_sink, 3);
             var processor = World.ActorFor(new[] { typeof(IProcessor<string, int>) },
                     typeof(StreamProcessor<string, int>),
@@ -31,6 +34,9 @@ namespace Vlingo.Xoom.Streams.Tests
             
             processor.Subscribe(subscriber);
             Publisher.Subscribe(processor);
+            
+            var sinkValue = _sink.AccessValueMustBe("value", 3);
+            Assert.Equal(3, sinkValue);
 
             var transformCount = access.ReadFrom<int>("transformCount");
             Assert.Equal(3, transformCount);
@@ -54,7 +60,6 @@ namespace Vlingo.Xoom.Streams.Tests
             var processor = World.ActorFor<IProcessor<string, int>>(() => new StreamProcessor<string, int>(_transformer, 10, PublisherConfiguration.DefaultDropHead));
 
             processor.Subscribe(subscriber);
-
             Publisher.Subscribe(processor);
 
             var sinkValue = _sink.AccessValueMustBe("value", 100);
@@ -74,8 +79,11 @@ namespace Vlingo.Xoom.Streams.Tests
             }
         }
 
-        public StreamProcessorTest()
+        public StreamProcessorTest(ITestOutputHelper output)
         {
+            var converter = new Converter(output);
+            Console.SetOut(converter);
+            
             _sink = new SafeConsumerSink<int>();
             _transformer = new StringToIntegerMapper();
         }

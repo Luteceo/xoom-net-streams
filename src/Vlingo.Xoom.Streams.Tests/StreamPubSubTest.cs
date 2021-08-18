@@ -60,10 +60,7 @@ namespace Vlingo.Xoom.Streams.Tests
 
         protected ISubscriber<T> CreateSubscriberWithoutSubscribing<T>(Sink<T> sink, long requestThreshold)
         {
-            var protocols = World.ActorFor(new[] { typeof(ISubscriber<T>) }, typeof(StreamSubscriber<T>), sink,
-                requestThreshold);
-
-            var subscriber = protocols.Get<ISubscriber<T>>(0);
+            var subscriber = World.ActorFor<ISubscriber<T>>(() => new StreamSubscriber<T>(sink, requestThreshold));
             return subscriber;
         }
 
