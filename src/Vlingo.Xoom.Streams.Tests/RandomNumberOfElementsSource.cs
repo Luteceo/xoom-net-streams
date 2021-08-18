@@ -34,7 +34,7 @@ namespace Vlingo.Xoom.Streams.Tests
             var current = _element.Get();
             if (current >= _total)
             {
-                return Completes.WithSuccess(new Elements<string>(new string[0], true));
+                return Completes.WithSuccess(new Elements<string>(Array.Empty<string>(), true));
             }
 
             var next = RandomNumberOfElements(current);

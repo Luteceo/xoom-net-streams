@@ -36,7 +36,7 @@ namespace Vlingo.Xoom.Streams.Source
                 return Completes.WithSuccess(new Elements<T>(elements, false));
             }
 
-            return Completes.WithSuccess(new Elements<T>(new T[0], true));
+            return Completes.WithSuccess(new Elements<T>(Array.Empty<T>(), true));
         }
 
         public override ICompletes<Elements<T>> Next(int maximumElements) => Next();

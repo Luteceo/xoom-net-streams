@@ -44,7 +44,7 @@ namespace Vlingo.Xoom.Streams.Source
         {
             if (_current >= _endExclusive)
             {
-                return Completes.WithSuccess(new Elements<long>(new long[0], true));
+                return Completes.WithSuccess(new Elements<long>(Array.Empty<long>(), true));
             }
             var elements = new long[1];
             elements[0] = _current++;
