@@ -50,7 +50,7 @@ namespace Vlingo.Xoom.Streams.Sink.Test
             var current = 0;
             for (var tries = 0; tries < 10; ++tries)
             {
-                var value = _access.ReadFrom<int>(name);
+                var value = _access.ReadFromExpecting<int>(name, expected, 1000, false);
                 if (value >= expected) return value;
                 if (!current.Equals(value)) current = value;
                 Thread.Sleep(100);

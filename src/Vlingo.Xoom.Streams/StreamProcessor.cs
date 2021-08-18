@@ -140,10 +140,13 @@ namespace Vlingo.Xoom.Streams
             private TR[]? NextValue(int maximum)
             {
                 var elements = Math.Min(_values.Count, maximum);
-                var nextValues = new object[elements] as TR[];
-                for (var idx = 0; idx < nextValues?.Length; ++idx) nextValues[idx] = _values.RemoveFromFront();
+                var nextValues = new TR[elements];
+                for (var idx = 0; idx < nextValues.Length; ++idx)
+                {
+                    nextValues[idx] = _values.RemoveFromFront();
+                }
 
-                return nextValues;
+                return nextValues.ToArray();
             }
 
             public override ICompletes<Elements<TR>> Next(long index) => Next((int)_streamProcessor._requestThreshold);
@@ -163,7 +166,7 @@ namespace Vlingo.Xoom.Streams
         
         private Action<T> ConsumerOperator(Operator<T, TR> @operator)
         {
-            return delegate(T value)
+            return value =>
             {
                 try
                 {
