@@ -81,7 +81,7 @@ namespace Vlingo.Xoom.Streams
 
             controller.RequestFlow(controller.Accumulate(maximum));
 
-            Publish(controller, default!);
+            Publish(controller, Optional.Empty<T>());
         }
 
         //===================================
@@ -99,28 +99,25 @@ namespace Vlingo.Xoom.Streams
             {
                 _source
                     .Next()
-                    .AndThen(maybeElements =>
+                    .AndThenConsume(maybeElements =>
                     {
                         if (!maybeElements.IsTerminated)
                         {
                             Console.WriteLine($"StreamPublisherDelegate PROCESS NEXT: ELEMENTS: {maybeElements}");
                             Publish(maybeElements.Values);
                             Schedule(false);
-                            return maybeElements;
+                            return;
                         }
 
                         if (Flush())
                         {
-                            return maybeElements;
+                            return;
                         }
 
                         Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
                         CompleteAll();
                         _stoppable.Stop();
-
-                        return maybeElements;
-                    })
-                    .Await();
+                    });
             }
             catch (Exception e)
             {
@@ -142,7 +139,7 @@ namespace Vlingo.Xoom.Streams
 
             if (maybeElements.Any())
             {
-                for (var idx = 0; idx < _subscriptions.Values.Count; ++idx)
+                for (var idx = 0; idx < maybeElements.Length; ++idx)
                 {
                     Publish(maybeElements[idx]);
                 }
@@ -155,11 +152,11 @@ namespace Vlingo.Xoom.Streams
         {
             foreach (var controller in _subscriptions.Values)
             {
-                controller.OnNext(elementOrNull);
+                controller.OnNext(Optional.Of(elementOrNull));
             }
         }
 
-        private void Publish(SubscriptionController<T> controller, T elementOrNull)
+        private void Publish(SubscriptionController<T> controller, Optional<T> elementOrNull)
         {
             Console.WriteLine($"StreamPublisherDelegate.{nameof(Publish)} | SubscriptionController: {controller}");
             controller.OnNext(elementOrNull);
@@ -174,7 +171,7 @@ namespace Vlingo.Xoom.Streams
             _flushed = false;
             foreach (var controller in _subscriptions.Values.Where(controller => controller.HasBufferedElements()))
             {
-                controller.OnNext(default!);
+                controller.OnNext(Optional.Empty<T>());
                 _flushed = true;
             }
 
@@ -199,20 +196,25 @@ namespace Vlingo.Xoom.Streams
             _subscriptions.Clear();
         }
 
+        // pure evil; don't try this at home.
+        // BTW, it is most likely not a slow
+        // operation to determine whether the
+        // Source is slow, like intsy tinsy
+        // blocking.
         private void DetermineIfSlow() => _slow = _source.IsSlow().Await();
 
         private void Schedule(bool isSubscribing)
         {
             if (_slow)
             {
-                _cancellable = _scheduler.ScheduleOnce(_scheduled, default!, new TimeSpan(0),
-                    new TimeSpan(_configuration.ProbeInterval));
+                _cancellable = _scheduler.ScheduleOnce(_scheduled, default!, TimeSpan.Zero,
+                    TimeSpan.FromMilliseconds(_configuration.ProbeInterval));
             }
             else
             {
                 if (isSubscribing && _cancellable == null)
-                    _cancellable = _scheduler.Schedule(_scheduled, default!, new TimeSpan(0),
-                        new TimeSpan(_configuration.ProbeInterval));
+                    _cancellable = _scheduler.Schedule(_scheduled, default!, TimeSpan.Zero,
+                        TimeSpan.FromMilliseconds(_configuration.ProbeInterval));
             }
         }
     }

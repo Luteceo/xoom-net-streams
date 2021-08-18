@@ -1,4 +1,11 @@
-﻿using System;
+﻿// Copyright © 2012-2021 VLINGO LABS. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
+using System;
 using System.Linq;
 using Nito.Collections;
 using Reactive.Streams;
@@ -10,7 +17,7 @@ namespace Vlingo.Xoom.Streams
     {
         private static readonly AtomicInteger NextId = new AtomicInteger(0);
 
-        private readonly Deque<T> _buffer;
+        private readonly Deque<Optional<T>> _buffer;
         private readonly ISubscriber<T> _subscriber;
         private readonly IControlledSubscription<T> _subscription;
         private readonly PublisherConfiguration _configuration;
@@ -30,7 +37,7 @@ namespace Vlingo.Xoom.Streams
             _subscriber = subscriber;
             _subscription = subscription;
             _configuration = configuration;
-            _buffer = new Deque<T>();
+            _buffer = new Deque<Optional<T>>();
             _cancelled = false;
         }
 
@@ -75,7 +82,7 @@ namespace Vlingo.Xoom.Streams
 
         internal bool HasBufferedElements() => _buffer.Any();
 
-        internal void OnNext(T element)
+        internal void OnNext(Optional<T> element)
         {
             Console.WriteLine($"SubscriptionController | Element: {element} : Remaining: {Remaining}");
 
@@ -84,7 +91,7 @@ namespace Vlingo.Xoom.Streams
             {
                 SendNext(element);
             }
-            else if (element == null)
+            else if (!element.IsPresent)
             {
                 // do nothing
             }
@@ -109,13 +116,13 @@ namespace Vlingo.Xoom.Streams
         
         public void OnError(Exception cause) => _subscriber.OnError(cause);
 
-        private void DropHeadFor(T element)
+        private void DropHeadFor(Optional<T> element)
         {
             _buffer.RemoveFromFront();
             _buffer.AddToBack(element);
         }
         
-        private void DropTailFor(T element)
+        private void DropTailFor(Optional<T> element)
         {
             _dropIndex = 0;
             var lastElement = _buffer.Count - 1;
@@ -129,7 +136,7 @@ namespace Vlingo.Xoom.Streams
             _buffer.AddToBack(element);
         }
         
-        private void SendNext(T element)
+        private void SendNext(Optional<T> element)
         {
             Console.WriteLine($"SubscriptionController | REMAINING: {Remaining}");
             var throttleCount = ThrottleCount;
@@ -138,11 +145,11 @@ namespace Vlingo.Xoom.Streams
             while (throttleCount-- > 0)
             {
                 var next = SwapBufferedOrElse(currentElement);
-                if (next != null)
+                if (next.IsPresent)
                 {
                     Console.WriteLine($"SENDING: {next}");
-                    currentElement = default;
-                    _subscriber.OnNext(next);
+                    currentElement = Optional.Empty<T>();
+                    _subscriber.OnNext(next.Get());
                     Increment();
                 }
                 else
@@ -152,7 +159,7 @@ namespace Vlingo.Xoom.Streams
             }
         }
         
-        private T SwapBufferedOrElse(T element)
+        private Optional<T> SwapBufferedOrElse(Optional<T> element)
         {
             if (!_buffer.Any())
             {
@@ -160,7 +167,7 @@ namespace Vlingo.Xoom.Streams
             }
 
             var next = _buffer.RemoveFromFront();
-            if (element != null)
+            if (element.IsPresent)
             {
                 _buffer.AddToBack(element);
             }
