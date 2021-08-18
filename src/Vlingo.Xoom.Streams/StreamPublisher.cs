@@ -43,7 +43,7 @@ namespace Vlingo.Xoom.Streams
         // Publisher
         //===================================
         
-        public void Subscribe(ISubscriber<T> subscriber)
+        public void Subscribe(ISubscriber<T>? subscriber)
         {
             Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
             if (subscriber != null)
