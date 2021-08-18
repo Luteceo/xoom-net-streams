@@ -15,7 +15,7 @@ namespace Vlingo.Xoom.Streams
     /// The standard <see cref="ISubscriber{T}"/> of streams.
     /// </summary>
     /// <typeparam name="T">The type od value consumed</typeparam>
-    public class StreamSubscriber<T> : Actor, ISubscriber<T>, IStoppable
+    public class StreamSubscriber<T> : Actor, ISubscriber<T>
     {
         private readonly ISubscriber<T> _subscriber;
 
