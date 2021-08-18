@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using Vlingo.Xoom.Actors.TestKit;
 using Vlingo.Xoom.Common;
@@ -38,7 +39,7 @@ namespace Vlingo.Xoom.Streams.Sink.Test
             _access.ReadingWith("terminate", () => _terminateCount.Get());
             _access.ReadingWith("value", () => _valueCount.Get());
 
-            _access.ReadingWith("values", () => _values);
+            _access.ReadingWith("values", () => _values.ToList());
 
             return _access;
         }
