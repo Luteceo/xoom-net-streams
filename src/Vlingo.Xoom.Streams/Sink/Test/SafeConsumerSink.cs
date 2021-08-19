@@ -46,7 +46,7 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
         public int AccessValueMustBe(string name, int expected)
         {
-            Console.WriteLine($"{GetType()}: {nameof(AccessValueMustBe)}");
+            //Console.WriteLine($"{GetType()}: {nameof(AccessValueMustBe)}");
             var current = 0;
             for (var tries = 0; tries < 10; ++tries)
             {
@@ -61,21 +61,21 @@ namespace Vlingo.Xoom.Streams.Sink.Test
 
         public override void Ready()
         {
-            Console.WriteLine($"{GetType()}: {nameof(Ready)}");
+            //Console.WriteLine($"{GetType()}: {nameof(Ready)}");
 
             _access.WriteUsing("ready", 1);
         }
 
         public override void Terminate()
         {
-            Console.WriteLine($"{GetType()}: {nameof(Terminate)}");
+            //Console.WriteLine($"{GetType()}: {nameof(Terminate)}");
 
             _access.WriteUsing("terminate", 1);
         }
 
         public override void WhenValue(T value)
         {
-            Console.WriteLine($"{GetType()}: {nameof(WhenValue)}");
+            //Console.WriteLine($"{GetType()}: {nameof(WhenValue)}");
 
             _access.WriteUsing("value", 1);
             _access.WriteUsing("values", value);

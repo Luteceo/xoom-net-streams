@@ -52,7 +52,7 @@ namespace Vlingo.Xoom.Streams
         
         public void Subscribe(ISubscriber<T> subscriber)
         {
-            Console.WriteLine($"3: {GetType()} : {nameof(Subscribe)}");
+            //Console.WriteLine($"3: {GetType()} : {nameof(Subscribe)}");
             Schedule(true);
 
             var controller = new SubscriptionController<T>(subscriber, _controlledSubscription, _configuration);
@@ -77,8 +77,7 @@ namespace Vlingo.Xoom.Streams
 
         public void Request(SubscriptionController<T> controller, long maximum)
         {
-            Console.WriteLine($"StreamPublisherDelegate.{nameof(Request)} | SubscriptionController: {controller}");
-
+            //Console.WriteLine($"StreamPublisherDelegate.{nameof(Request)} | SubscriptionController: {controller}");
             controller.RequestFlow(controller.Accumulate(maximum));
 
             Publish(controller, Optional.Empty<T>());
@@ -103,7 +102,7 @@ namespace Vlingo.Xoom.Streams
                     {
                         if (!maybeElements.IsTerminated)
                         {
-                            Console.WriteLine($"StreamPublisherDelegate PROCESS NEXT: ELEMENTS: {maybeElements}");
+                            //Console.WriteLine($"StreamPublisherDelegate PROCESS NEXT: ELEMENTS: {maybeElements}");
                             Publish(maybeElements.Values);
                             Schedule(false);
                         }
@@ -113,7 +112,7 @@ namespace Vlingo.Xoom.Streams
                         }
                         else
                         {
-                            Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
+                            //Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
                             CompleteAll();
                             _stoppable.Stop();
                         }
@@ -135,8 +134,7 @@ namespace Vlingo.Xoom.Streams
 
         private T[] Publish(T[] maybeElements)
         {
-            Console.WriteLine($"StreamPublisherDelegate T[] {nameof(Publish)} | maybeElements: {string.Join(", ", maybeElements)}");
-
+            //Console.WriteLine($"StreamPublisherDelegate T[] {nameof(Publish)} | maybeElements: {string.Join(", ", maybeElements)}");
             if (maybeElements.Any())
             {
                 for (var idx = 0; idx < maybeElements.Length; ++idx)
@@ -158,7 +156,7 @@ namespace Vlingo.Xoom.Streams
 
         private void Publish(SubscriptionController<T> controller, Optional<T> elementOrNull)
         {
-            Console.WriteLine($"StreamPublisherDelegate.{nameof(Publish)} | SubscriptionController: {controller}");
+            //Console.WriteLine($"StreamPublisherDelegate.{nameof(Publish)} | SubscriptionController: {controller}");
             controller.OnNext(elementOrNull);
         }
 
@@ -166,8 +164,7 @@ namespace Vlingo.Xoom.Streams
 
         private bool Flush()
         {
-            Console.WriteLine($"StreamPublisherDelegate.{nameof(Flush)}");
-
+            //Console.WriteLine($"StreamPublisherDelegate.{nameof(Flush)}");
             _flushed = false;
             foreach (var controller in _subscriptions.Values.Where(controller => controller.HasBufferedElements()))
             {
@@ -186,8 +183,7 @@ namespace Vlingo.Xoom.Streams
 
         private void CompleteAll()
         {
-            Console.WriteLine($"StreamPublisherDelegate.{nameof(CompleteAll)}");
-
+            //Console.WriteLine($"StreamPublisherDelegate.{nameof(CompleteAll)}");
             foreach (var controller in _subscriptions.Values)
             {
                 controller.Subscriber.OnComplete();

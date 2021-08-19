@@ -5,7 +5,6 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-using System;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 using Vlingo.Xoom.Common;
@@ -33,7 +32,7 @@ namespace Vlingo.Xoom.Streams
         public void Request(SubscriptionController<T> subscription, long maximum)
         {
             //Console.WriteLine($"{GetType()} : {nameof(Request)}");
-            Console.WriteLine($"StreamPublisher.Request | SubscriptionController: {subscription}, maximum: {maximum}");
+            //Console.WriteLine($"StreamPublisher.Request | SubscriptionController: {subscription}, maximum: {maximum}");
             _delegate.Request(subscription, maximum);
         }
         
@@ -45,7 +44,7 @@ namespace Vlingo.Xoom.Streams
         
         public void Subscribe(ISubscriber<T>? subscriber)
         {
-            Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
+            //Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
             if (subscriber != null)
             {
                 _delegate.Subscribe(subscriber);
