@@ -51,15 +51,12 @@ namespace Vlingo.Xoom.Streams.Tests
         [Fact]
         public void TestThatSubscriberReceivesTotalRandomNumberOfElements()
         {
-            // GIVEN
             CreatePublisherWith(SourceRandomNumberOfElements);
             var subscriber = new TestSubscriber<string>(100);
             var access = subscriber.AfterCompleting(102);
 
-            // WHEN
             Publisher.Subscribe(subscriber);
 
-            // THEN
             var subscriberCount = access.ReadFrom<int>("onSubscribe");
             Assert.Equal(1, subscriberCount);
 
@@ -77,15 +74,12 @@ namespace Vlingo.Xoom.Streams.Tests
         [Fact]
         public void TestThatSubscriberReceivesUpToCancel()
         {
-            // GIVEN
             CreatePublisherWith(SourceRandomNumberOfElements);
             var subscriber = new TestSubscriber<string>(100, 50);
             var access = subscriber.AfterCompleting(50);
 
-            // WHEN
             Publisher.Subscribe(subscriber);
 
-            // THEN
             var subscriberCount = access.ReadFrom<int>("onSubscribe");
             Assert.Equal(1, subscriberCount);
 
@@ -100,16 +94,13 @@ namespace Vlingo.Xoom.Streams.Tests
         [Fact]
         public void TestThatSubscriberReceiversFromSlowSource()
         {
-            // GIVEN
             SourceRandomNumberOfElements = new RandomNumberOfElementsSource(100, true);
             CreatePublisherWith(SourceRandomNumberOfElements);
             var subscriber = new TestSubscriber<string>(100);
             var access = subscriber.AfterCompleting(102);
 
-            // WHEN
             Publisher.Subscribe(subscriber);
 
-            // THEN
             var subscriberCount = access.ReadFrom<int>("onSubscribe");
             Assert.Equal(1, subscriberCount);
 
