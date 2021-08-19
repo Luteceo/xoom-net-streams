@@ -6,8 +6,8 @@
 // one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Nito.Collections;
 using Reactive.Streams;
 using Vlingo.Xoom.Common;
 
@@ -17,7 +17,7 @@ namespace Vlingo.Xoom.Streams
     {
         private static readonly AtomicInteger NextId = new AtomicInteger(0);
 
-        private readonly Deque<Optional<T>> _buffer;
+        private readonly Queue<Optional<T>> _buffer;
         private readonly ISubscriber<T> _subscriber;
         private readonly IControlledSubscription<T> _subscription;
         private readonly PublisherConfiguration _configuration;
@@ -37,7 +37,7 @@ namespace Vlingo.Xoom.Streams
             _subscriber = subscriber;
             _subscription = subscription;
             _configuration = configuration;
-            _buffer = new Deque<Optional<T>>();
+            _buffer = new Queue<Optional<T>>();
             _cancelled = false;
         }
 
@@ -97,7 +97,7 @@ namespace Vlingo.Xoom.Streams
             }
             else if (_buffer.Count < _configuration.BufferSize)
             {
-                _buffer.AddToBack(element);
+                _buffer.Enqueue(element);
             }
             else
             {
@@ -118,8 +118,8 @@ namespace Vlingo.Xoom.Streams
 
         private void DropHeadFor(Optional<T> element)
         {
-            _buffer.RemoveFromFront();
-            _buffer.AddToBack(element);
+            _buffer.Dequeue();
+            _buffer.Enqueue(element);
         }
         
         private void DropTailFor(Optional<T> element)
@@ -130,10 +130,10 @@ namespace Vlingo.Xoom.Streams
             {
                 if (_dropIndex++ == lastElement)
                 {
-                    _buffer.Remove(el);
+                    _buffer.Dequeue();
                 }
             }
-            _buffer.AddToBack(element);
+            _buffer.Enqueue(element);
         }
         
         private void SendNext(Optional<T> element)
@@ -166,10 +166,10 @@ namespace Vlingo.Xoom.Streams
                 return element;
             }
 
-            var next = _buffer.RemoveFromFront();
+            var next = _buffer.Dequeue();
             if (element.IsPresent)
             {
-                _buffer.AddToBack(element);
+                _buffer.Enqueue(element);
             }
 
             return next;

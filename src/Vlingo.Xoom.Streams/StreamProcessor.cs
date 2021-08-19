@@ -6,8 +6,8 @@
 // one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Nito.Collections;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 using Vlingo.Xoom.Common;
@@ -111,12 +111,12 @@ namespace Vlingo.Xoom.Streams
         {
             private readonly StreamProcessor<T, TR> _streamProcessor;
             private bool _terminated;
-            private readonly Deque<TR> _values;
+            private readonly Queue<TR> _values;
 
             public PublisherSource(StreamProcessor<T, TR> streamProcessor)
             {
                 _streamProcessor = streamProcessor;
-                _values = new Deque<TR>();
+                _values = new Queue<TR>();
                 _terminated = false;
             }
 
@@ -143,7 +143,7 @@ namespace Vlingo.Xoom.Streams
                 var nextValues = new TR[elements];
                 for (var idx = 0; idx < nextValues.Length; ++idx)
                 {
-                    nextValues[idx] = _values.RemoveFromFront();
+                    nextValues[idx] = _values.Dequeue();
                 }
 
                 return nextValues.ToArray();
@@ -155,7 +155,7 @@ namespace Vlingo.Xoom.Streams
 
             public override ICompletes<bool> IsSlow() => Common.Completes.WithSuccess(false);
 
-            public void Enqueue(TR value) => _values.AddToBack(value);
+            public void Enqueue(TR value) => _values.Enqueue(value);
 
             public void Terminate() => _terminated = true;
         }
