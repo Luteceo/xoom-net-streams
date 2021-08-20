@@ -10,7 +10,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Source
 {
-    public class LongRangeSource : Source<long>
+    public class LongRangeSource : DefaultSource<long>
     {
         private readonly long _startInclusive;
         private readonly long _endExclusive;

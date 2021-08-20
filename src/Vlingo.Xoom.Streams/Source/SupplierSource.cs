@@ -14,7 +14,7 @@ namespace Vlingo.Xoom.Streams.Source
     /// A Source that uses a <see cref="Func{TResult}"/> to provide next <see cref="Elements{T}"/> instances.
     /// </summary>
     /// <typeparam name="T">The T type of Element being supplied</typeparam>
-    public class SupplierSource<T> : Source<T>
+    public class SupplierSource<T> : DefaultSource<T>
     {
         private readonly bool _slowSupplier;
         private readonly Func<T> _supplier;

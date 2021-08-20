@@ -11,7 +11,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Operator
 {
-    public abstract class QueueSource<T> : Source<T>
+    public abstract class QueueSource<T> : DefaultSource<T>
     {
         private readonly Queue<T> _queue;
         private readonly bool _slow;

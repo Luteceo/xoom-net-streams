@@ -39,7 +39,7 @@ namespace Vlingo.Xoom.Streams
         /// </summary>
         /// <param name="mapper">The <code>Func{T, Source{TR}}</code> that maps from values of <typeparamref name="T"/> to values of <typeparamref name="TR"/></param>
         /// <returns><see cref="Operator{T,TR}"/></returns>
-        public static Operator<T, TR> FlatMapWith(Func<T, Source<TR>> mapper) => new FlatMapper<T, TR>(mapper);
+        public static Operator<T, TR> FlatMapWith(Func<T, ISource<TR>> mapper) => new FlatMapper<T, TR>(mapper);
 
         /// <summary>
         /// Accept the <typeparamref name="T"/> value and potentially give an

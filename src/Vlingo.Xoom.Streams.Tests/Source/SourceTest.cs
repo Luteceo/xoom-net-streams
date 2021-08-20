@@ -13,7 +13,7 @@ namespace Vlingo.Xoom.Streams.Tests.Source
     {
         private readonly StringBuilder _builder = new StringBuilder();
 
-        protected string StringFromSource(Source<string> source)
+        protected string StringFromSource(ISource<string> source)
         {
             var current = "";
             while (current != null)

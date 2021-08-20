@@ -107,7 +107,7 @@ namespace Vlingo.Xoom.Streams
         // PublisherSource
         //===================================
         
-        private class PublisherSource : Source<TR>
+        private class PublisherSource : DefaultSource<TR>
         {
             private readonly StreamProcessor<T, TR> _streamProcessor;
             private bool _terminated;

@@ -80,7 +80,7 @@ namespace Vlingo.Xoom.Streams
         /// <param name="source">The <see cref="Source{T}"/> used by the <see cref="IPublisher{T}"/> to read elements</param>
         /// <typeparam name="T">The T typed elements to be published</typeparam>
         /// <returns><see cref="IPublisher{T}"/></returns>
-        public static IPublisher<T> PublisherWith<T>(Stage stage, Source<T> source) => 
+        public static IPublisher<T> PublisherWith<T>(Stage stage, ISource<T> source) => 
             PublisherWith(stage, source, PublisherConfiguration.DefaultDropHead);
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Vlingo.Xoom.Streams
         /// <param name="configuration">The PublisherConfiguration used to configure the <see cref="IPublisher{T}"/></param>
         /// <typeparam name="T">The T typed elements to be published</typeparam>
         /// <returns><see cref="IPublisher{T}"/></returns>
-        public static IPublisher<T> PublisherWith<T>(Stage stage, Source<T> source, PublisherConfiguration configuration) => 
+        public static IPublisher<T> PublisherWith<T>(Stage stage, ISource<T> source, PublisherConfiguration configuration) => 
             stage.ActorFor<IPublisher<T>>(() => new StreamPublisher<T>(source, configuration));
 
         /// <summary>

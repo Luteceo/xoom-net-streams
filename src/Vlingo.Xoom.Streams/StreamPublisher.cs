@@ -15,7 +15,7 @@ namespace Vlingo.Xoom.Streams
     {
         private readonly StreamPublisherDelegate<T> _delegate;
 
-        public StreamPublisher(Source<T> source, PublisherConfiguration configuration) =>
+        public StreamPublisher(ISource<T> source, PublisherConfiguration configuration) =>
             _delegate = new StreamPublisherDelegate<T>(source, configuration, SelfAs<IControlledSubscription<T>>(),
                 Scheduler, SelfAs<IScheduled<object>>(), SelfAs<IStoppable>());
         

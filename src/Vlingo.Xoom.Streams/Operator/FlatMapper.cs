@@ -11,10 +11,10 @@ namespace Vlingo.Xoom.Streams.Operator
 {
     public class FlatMapper<T, TR> : Operator<T, TR>
     {
-        private readonly Func<T, Source<TR>> _mapper;
+        private readonly Func<T, ISource<TR>> _mapper;
         private const int MaximumBuffer = 32;
 
-        public FlatMapper(Func<T, Source<TR>> mapper) => _mapper = mapper;
+        public FlatMapper(Func<T, ISource<TR>> mapper) => _mapper = mapper;
 
         public override void PerformInto(T value, Action<TR> consumer)
         {
@@ -29,7 +29,7 @@ namespace Vlingo.Xoom.Streams.Operator
             }
         }
 
-        private static void PropagateSource(Source<TR> source, Action<TR> consumer)
+        private static void PropagateSource(ISource<TR> source, Action<TR> consumer)
         {
             source
                 .Next(MaximumBuffer)

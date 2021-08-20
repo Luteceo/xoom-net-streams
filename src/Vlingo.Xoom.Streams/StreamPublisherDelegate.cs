@@ -16,7 +16,7 @@ namespace Vlingo.Xoom.Streams
 {
     public class StreamPublisherDelegate<T> : IPublisher<T>, IControlledSubscription<T>
     {
-        private readonly Source<T> _source;
+        private readonly ISource<T> _source;
         private readonly PublisherConfiguration _configuration;
         private readonly IControlledSubscription<T> _controlledSubscription;
         private readonly Scheduler _scheduler;
@@ -28,7 +28,7 @@ namespace Vlingo.Xoom.Streams
         private bool _slow;
         private ICancellable? _cancellable;
 
-        public StreamPublisherDelegate(Source<T> source, PublisherConfiguration configuration,
+        public StreamPublisherDelegate(ISource<T> source, PublisherConfiguration configuration,
             IControlledSubscription<T> controlledSubscription, Scheduler scheduler,
             IScheduled<object> scheduled, IStoppable stoppable)
         {

@@ -17,9 +17,9 @@ namespace Vlingo.Xoom.Streams.Tests
     {
         protected readonly PublisherConfiguration Configuration;
         protected IControlledSubscription<string> ControlledSubscription;
-        protected readonly Source<string> SourceOf123;
-        protected readonly Source<string> SourceOfABC;
-        protected Source<string> SourceRandomNumberOfElements;
+        protected readonly ISource<string> SourceOf123;
+        protected readonly ISource<string> SourceOfABC;
+        protected ISource<string> SourceRandomNumberOfElements;
         protected IPublisher<string> Publisher;
         protected ISubscriber<string> Subscriber;
         protected readonly World World;
@@ -37,7 +37,7 @@ namespace Vlingo.Xoom.Streams.Tests
             SourceRandomNumberOfElements = new RandomNumberOfElementsSource(100);
         }
 
-        protected void CreatePublisherWith(Source<string> source)
+        protected void CreatePublisherWith(ISource<string> source)
         {
             var definition = Definition.Has<StreamPublisher<string>>(Definition.Parameters(source, Configuration));
 

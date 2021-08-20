@@ -10,7 +10,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams.Tests
 {
-    internal class RandomNumberOfElementsSource : Source<string>
+    internal class RandomNumberOfElementsSource : DefaultSource<string>
     {
         private readonly AtomicInteger _element = new AtomicInteger(0);
         private readonly Random _count = new Random();
