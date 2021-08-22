@@ -22,12 +22,12 @@ namespace Vlingo.Xoom.Streams
         public StreamSubscriber(Sink<T> sink, long requestThreshold) => 
             _subscriber = new StreamSubscriberDelegate<T>(sink, requestThreshold, Logger);
 
-        public void OnComplete() => _subscriber.OnComplete();
+        public virtual void OnComplete() => _subscriber.OnComplete();
 
-        public void OnError(Exception cause) => _subscriber.OnError(cause);
+        public virtual void OnError(Exception cause) => _subscriber.OnError(cause);
 
-        public void OnNext(T element) => _subscriber.OnNext(element);
+        public virtual void OnNext(T element) => _subscriber.OnNext(element);
 
-        public void OnSubscribe(ISubscription subscription) => _subscriber.OnSubscribe(subscription);
+        public virtual void OnSubscribe(ISubscription? subscription) => _subscriber.OnSubscribe(subscription);
     }
 }
