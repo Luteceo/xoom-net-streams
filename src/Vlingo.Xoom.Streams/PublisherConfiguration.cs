@@ -12,7 +12,7 @@ namespace Vlingo.Xoom.Streams
 {
     public class PublisherConfiguration
     {
-        public const int DefaultProbeInterval = 5;
+        public const int DefaultProbeInterval = 15;
         public const int FastProbeInterval = 2;
         public const int FastestProbeInterval = 1;
 
