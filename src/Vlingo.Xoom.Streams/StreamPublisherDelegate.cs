@@ -135,12 +135,9 @@ namespace Vlingo.Xoom.Streams
         private T[] Publish(T[] maybeElements)
         {
             //Console.WriteLine($"StreamPublisherDelegate T[] {nameof(Publish)} | maybeElements: {string.Join(", ", maybeElements)}");
-            if (maybeElements.Any())
+            foreach (var maybeElement in maybeElements)
             {
-                for (var idx = 0; idx < maybeElements.Length; ++idx)
-                {
-                    Publish(maybeElements[idx]);
-                }
+                Publish(maybeElement);
             }
 
             return maybeElements;
