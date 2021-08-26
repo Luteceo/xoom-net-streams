@@ -134,10 +134,10 @@ namespace Vlingo.Xoom.Streams
                     return Common.Completes.WithSuccess(Elements<TR>.Empty());
                 }
 
-                return Common.Completes.WithSuccess(Elements<TR>.Of(NextValue(maximumElements)!));
+                return Common.Completes.WithSuccess(Elements<TR>.Of(NextValue(maximumElements)));
             }
 
-            private TR[]? NextValue(int maximum)
+            private TR[] NextValue(int maximum)
             {
                 var elements = Math.Min(_values.Count, maximum);
                 var nextValues = new TR[elements];
