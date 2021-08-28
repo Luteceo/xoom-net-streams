@@ -8,7 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 using Vlingo.Xoom.Common;
@@ -114,7 +113,6 @@ namespace Vlingo.Xoom.Streams
                         else
                         {
                             //Console.WriteLine("StreamPublisherDelegate COMPLETING ALL");
-                            Thread.Sleep(1000);
                             CompleteAll();
                             _stoppable.Stop();
                         }
