@@ -5,7 +5,6 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -48,12 +47,12 @@ namespace Vlingo.Xoom.Streams.Sink.Test
         {
             //Console.WriteLine($"{GetType()}: {nameof(AccessValueMustBe)}");
             var current = 0;
-            for (var tries = 0; tries < 100; ++tries)
+            for (var tries = 0; tries < 200; ++tries)
             {
-                var value = _access.ReadFromExpecting(name, expected, 1000, false);
+                var value = _access.ReadFromExpecting(name, expected, 10, false);
                 if (value >= expected) return value;
                 if (!current.Equals(value)) current = value;
-                Thread.Sleep(10);
+                Thread.Sleep(90);
             }
 
             return expected == 0 ? -1 : current;
