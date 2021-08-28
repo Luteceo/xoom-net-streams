@@ -33,7 +33,7 @@ namespace Vlingo.Xoom.Streams.Tests.Sink
             sink.WhenValue("B");
             sink.WhenValue("C");
 
-            Assert.Equal("A\nB\nC\n", PrintString());
+            Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Vlingo.Xoom.Streams.Tests.Sink
             sink.WhenValue("B");
             sink.WhenValue("C");
 
-            Assert.Equal("-A\n-B\n-C\n", PrintString());
+            Assert.Equal($"-A{Environment.NewLine}-B{Environment.NewLine}-C{Environment.NewLine}", PrintString());
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Vlingo.Xoom.Streams.Tests.Sink
 
             sink.WhenValue("D");
 
-            Assert.Equal("A\nB\nC\n", PrintString());
+            Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
         }
 
         public void Dispose() => _byteStream?.Dispose();
