@@ -7,7 +7,7 @@
 
 		<!-- NuGet Metadata -->
 		<IsPackable>true</IsPackable>
-		<PackageVersion>0.1.0</PackageVersion>
+		<PackageVersion>$(VlingoVersion)</PackageVersion>
 		<PackageId>Vlingo.Xoom.Streams</PackageId>
 		<Authors>Vlingo</Authors>
 		<Description>
@@ -35,7 +35,7 @@
 		</When>
 		<Otherwise>
 			<ItemGroup>
-				<PackageReference Include="Vlingo.Xoom.Actors" Version="1.8.0" />
+				<PackageReference Include="Vlingo.Xoom.Actors" Version="$(VlingoVersion)" />
 			</ItemGroup>
 		</Otherwise>
 	</Choose>
