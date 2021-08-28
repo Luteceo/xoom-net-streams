@@ -52,7 +52,7 @@ namespace Vlingo.Xoom.Streams.Sink.Test
                 var value = _access.ReadFromExpecting(name, expected, 10, false);
                 if (value >= expected) return value;
                 if (!current.Equals(value)) current = value;
-                Thread.Sleep(10);
+                Thread.Sleep(15);
             }
 
             return expected == 0 ? -1 : current;
