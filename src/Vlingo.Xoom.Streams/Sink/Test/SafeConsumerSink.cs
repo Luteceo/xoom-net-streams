@@ -48,12 +48,12 @@ namespace Vlingo.Xoom.Streams.Sink.Test
         {
             //Console.WriteLine($"{GetType()}: {nameof(AccessValueMustBe)}");
             var current = 0;
-            for (var tries = 0; tries < 10; ++tries)
+            for (var tries = 0; tries < 100; ++tries)
             {
-                var value = _access.ReadFromExpecting<int>(name, expected, 1000, false);
+                var value = _access.ReadFromExpecting(name, expected, 1000, false);
                 if (value >= expected) return value;
                 if (!current.Equals(value)) current = value;
-                Thread.Sleep(100);
+                Thread.Sleep(10);
             }
 
             return expected == 0 ? -1 : current;
