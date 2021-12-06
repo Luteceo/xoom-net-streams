@@ -11,7 +11,7 @@ using Vlingo.Xoom.Common;
 
 namespace Vlingo.Xoom.Streams
 {
-    public sealed class StreamPublisher<T> : Actor, IPublisher<T>, IControlledSubscription<T>, IScheduled<object>
+    public class StreamPublisher<T> : Actor, IPublisher<T>, IControlledSubscription<T>, IScheduled<object>
     {
         private readonly StreamPublisherDelegate<T> _delegate;
 

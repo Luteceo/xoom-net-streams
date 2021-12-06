@@ -49,7 +49,7 @@ namespace Vlingo.Xoom.Streams.Operator
 
         public override ICompletes<bool> IsSlow() => Completes.WithSuccess(_slow);
         
-        protected void Add(T value) => _queue.Enqueue(value);
+        public void Add(T value) => _queue.Enqueue(value);
 
         protected void Terminated() => _terminated = true;
 
