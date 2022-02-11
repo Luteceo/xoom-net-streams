@@ -8,31 +8,30 @@
 using System;
 using Xunit;
 
-namespace Vlingo.Xoom.Streams.Tests.Source
+namespace Vlingo.Xoom.Streams.Tests.Source;
+
+public class SupplierSourceTest : SourceTest
 {
-    public class SupplierSourceTest : SourceTest
-    {
-        private int _index;
+    private int _index;
         
-        [Fact]
-        public void TestThatSourceSupplierProvidesElements()
+    [Fact]
+    public void TestThatSourceSupplierProvidesElements()
+    {
+        _index = 0;
+
+        Func<string> supplier = () =>
         {
-            _index = 0;
+            if (_index >= 3) return null;
+            var next = (char) ('A' + _index);
+            var value = next.ToString();
+            ++_index;
+            return value;
+        };
 
-            Func<string> supplier = () =>
-            {
-                if (_index >= 3) return null;
-                var next = (char) ('A' + _index);
-                var value = next.ToString();
-                ++_index;
-                return value;
-            };
+        var source = Source<string>.With(supplier);
 
-            var source = Source<string>.With(supplier);
+        var result = StringFromSource(source);
 
-            var result = StringFromSource(source);
-
-            Assert.Equal("ABC", result);
-        }
+        Assert.Equal("ABC", result);
     }
 }

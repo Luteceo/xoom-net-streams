@@ -7,29 +7,28 @@
 
 using System;
 
-namespace Vlingo.Xoom.Streams.Operator
+namespace Vlingo.Xoom.Streams.Operator;
+
+/// <summary>
+/// Maps from <see cref="Sink{T}"/> to <see cref="Source{T}"/>
+/// </summary>
+/// <typeparam name="T">The input parameter type</typeparam>
+/// <typeparam name="TR">The result type</typeparam>
+public class Mapper<T, TR> : Operator<T, TR>
 {
-    /// <summary>
-    /// Maps from <see cref="Sink{T}"/> to <see cref="Source{T}"/>
-    /// </summary>
-    /// <typeparam name="T">The input parameter type</typeparam>
-    /// <typeparam name="TR">The result type</typeparam>
-    public class Mapper<T, TR> : Operator<T, TR>
+    private readonly Func<T, TR> _mapper;
+
+    public Mapper(Func<T, TR> mapper) => _mapper = mapper;
+
+    public override void PerformInto(T value, Action<TR> consumer)
     {
-        private readonly Func<T, TR> _mapper;
-
-        public Mapper(Func<T, TR> mapper) => _mapper = mapper;
-
-        public override void PerformInto(T value, Action<TR> consumer)
+        try
         {
-            try
-            {
-                consumer.Invoke(_mapper.Invoke(value));
-            }
-            catch (Exception e)
-            {
-                Streams.Logger.Error($"Mapper failed because: {e.Message}", e);
-            }
+            consumer.Invoke(_mapper.Invoke(value));
+        }
+        catch (Exception e)
+        {
+            Streams.Logger.Error($"Mapper failed because: {e.Message}", e);
         }
     }
 }

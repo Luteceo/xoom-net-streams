@@ -9,25 +9,24 @@ using System;
 using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 
-namespace Vlingo.Xoom.Streams
+namespace Vlingo.Xoom.Streams;
+
+/// <summary>
+/// The standard <see cref="ISubscriber{T}"/> of streams.
+/// </summary>
+/// <typeparam name="T">The type od value consumed</typeparam>
+public class StreamSubscriber<T> : Actor, ISubscriber<T>
 {
-    /// <summary>
-    /// The standard <see cref="ISubscriber{T}"/> of streams.
-    /// </summary>
-    /// <typeparam name="T">The type od value consumed</typeparam>
-    public class StreamSubscriber<T> : Actor, ISubscriber<T>
-    {
-        private readonly ISubscriber<T> _subscriber;
+    private readonly ISubscriber<T> _subscriber;
 
-        public StreamSubscriber(Sink<T> sink, long requestThreshold) => 
-            _subscriber = new StreamSubscriberDelegate<T>(sink, requestThreshold, Logger);
+    public StreamSubscriber(Sink<T> sink, long requestThreshold) => 
+        _subscriber = new StreamSubscriberDelegate<T>(sink, requestThreshold, Logger);
 
-        public virtual void OnComplete() => _subscriber.OnComplete();
+    public virtual void OnComplete() => _subscriber.OnComplete();
 
-        public virtual void OnError(Exception cause) => _subscriber.OnError(cause);
+    public virtual void OnError(Exception cause) => _subscriber.OnError(cause);
 
-        public virtual void OnNext(T element) => _subscriber.OnNext(element);
+    public virtual void OnNext(T element) => _subscriber.OnNext(element);
 
-        public virtual void OnSubscribe(ISubscription? subscription) => _subscriber.OnSubscribe(subscription);
-    }
+    public virtual void OnSubscribe(ISubscription? subscription) => _subscriber.OnSubscribe(subscription);
 }

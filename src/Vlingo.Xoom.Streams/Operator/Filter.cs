@@ -7,31 +7,30 @@
 
 using System;
 
-namespace Vlingo.Xoom.Streams.Operator
+namespace Vlingo.Xoom.Streams.Operator;
+
+/// <summary>
+/// Filters <see cref="Sink{T}"/> values and potentially produces <see cref="Source{T}"/> values.
+/// </summary>
+/// <typeparam name="T">The input and output type</typeparam>
+public class Filter<T> : Operator<T, T>
 {
-    /// <summary>
-    /// Filters <see cref="Sink{T}"/> values and potentially produces <see cref="Source{T}"/> values.
-    /// </summary>
-    /// <typeparam name="T">The input and output type</typeparam>
-    public class Filter<T> : Operator<T, T>
+    private readonly Predicate<T> _predicate;
+
+    public Filter(Predicate<T> predicate) => _predicate = predicate;
+
+    public override void PerformInto(T value, Action<T> consumer)
     {
-        private readonly Predicate<T> _predicate;
-
-        public Filter(Predicate<T> predicate) => _predicate = predicate;
-
-        public override void PerformInto(T value, Action<T> consumer)
+        try
         {
-            try
+            if (_predicate.Invoke(value))
             {
-                if (_predicate.Invoke(value))
-                {
-                    consumer.Invoke(value);
-                }
+                consumer.Invoke(value);
             }
-            catch (Exception e)
-            {
-                Streams.Logger.Error($"Filter failed because: {e.Message}", e);
-            }
+        }
+        catch (Exception e)
+        {
+            Streams.Logger.Error($"Filter failed because: {e.Message}", e);
         }
     }
 }

@@ -5,11 +5,10 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-namespace Vlingo.Xoom.Streams
+namespace Vlingo.Xoom.Streams;
+
+public interface IControlledSubscription<T>
 {
-    public interface IControlledSubscription<T>
-    {
-        public void Cancel(SubscriptionController<T> subscription);
-        public void Request(SubscriptionController<T> subscription, long maximum);
-    }
+    public void Cancel(SubscriptionController<T> subscription);
+    public void Request(SubscriptionController<T> subscription, long maximum);
 }

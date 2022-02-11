@@ -9,66 +9,65 @@ using System;
 using Vlingo.Xoom.Streams.Source;
 using Xunit;
 
-namespace Vlingo.Xoom.Streams.Tests.Source
+namespace Vlingo.Xoom.Streams.Tests.Source;
+
+public class LongRangeSourceTest
 {
-    public class LongRangeSourceTest
-    {
-        private long _current = 0;
-        private long _expected = 0;
-        private bool _terminated = false;
+    private long _current = 0;
+    private long _expected = 0;
+    private bool _terminated = false;
         
-        [Fact]
-        public void TestThatRangeCompletes()
+    [Fact]
+    public void TestThatRangeCompletes()
+    {
+        var range = Source<long>.RangeOf(1, 11);
+
+        while (!_terminated)
         {
-            var range = Source<long>.RangeOf(1, 11);
-
-            while (!_terminated)
-            {
-                ++_expected;
-                range.Next().AndThenConsume(elements => {
-                    if (!elements.IsTerminated)
-                    {
-                        _current = elements.Values[0];
-                        Assert.Equal(_expected, _current);
-                    }
-                    _terminated = elements.IsTerminated;
-                });
-            }
-
-            Assert.Equal(10, _current);
-        }
-
-        [Fact]
-        public void TestThatZeroZeroRangeCompletes()
-        {
-            var range = Source<long>.RangeOf(0, 0);
-
-            range.Next().AndThenConsume(elements =>
-            {
+            ++_expected;
+            range.Next().AndThenConsume(elements => {
                 if (!elements.IsTerminated)
                 {
                     _current = elements.Values[0];
                     Assert.Equal(_expected, _current);
                 }
-                else
-                {
-                    _terminated = true;
-                }
+                _terminated = elements.IsTerminated;
             });
-
-            Assert.True(_terminated);
         }
 
-        [Fact]
-        public void TestThatOverflowThrows()
+        Assert.Equal(10, _current);
+    }
+
+    [Fact]
+    public void TestThatZeroZeroRangeCompletes()
+    {
+        var range = Source<long>.RangeOf(0, 0);
+
+        range.Next().AndThenConsume(elements =>
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LongRangeSource(0, -1));
-        }
+            if (!elements.IsTerminated)
+            {
+                _current = elements.Values[0];
+                Assert.Equal(_expected, _current);
+            }
+            else
+            {
+                _terminated = true;
+            }
+        });
 
-        [Fact]
-        public void TestThatStartUnderflowThrows()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LongRangeSource(-1, long.MaxValue));
-        }
+        Assert.True(_terminated);
+    }
+
+    [Fact]
+    public void TestThatOverflowThrows()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new LongRangeSource(0, -1));
+    }
+
+    [Fact]
+    public void TestThatStartUnderflowThrows()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new LongRangeSource(-1, long.MaxValue));
     }
 }

@@ -9,57 +9,56 @@ using Reactive.Streams;
 using Vlingo.Xoom.Actors;
 using Vlingo.Xoom.Common;
 
-namespace Vlingo.Xoom.Streams
+namespace Vlingo.Xoom.Streams;
+
+public class StreamPublisher<T> : Actor, IPublisher<T>, IControlledSubscription<T>, IScheduled<object>
 {
-    public class StreamPublisher<T> : Actor, IPublisher<T>, IControlledSubscription<T>, IScheduled<object>
+    private readonly StreamPublisherDelegate<T> _delegate;
+
+    public StreamPublisher(ISource<T> source, PublisherConfiguration configuration) =>
+        _delegate = new StreamPublisherDelegate<T>(source, configuration, SelfAs<IControlledSubscription<T>>(),
+            Scheduler, SelfAs<IScheduled<object>>(), SelfAs<IStoppable>());
+        
+    //===================================
+    // Scheduled
+    //===================================
+        
+    public void IntervalSignal(IScheduled<object> scheduled, object data) => _delegate.ProcessNext();
+
+    //===================================
+    // ControlledSubscription
+    //===================================
+        
+    public void Request(SubscriptionController<T> subscription, long maximum)
     {
-        private readonly StreamPublisherDelegate<T> _delegate;
+        //Console.WriteLine($"{GetType()} : {nameof(Request)}");
+        //Console.WriteLine($"StreamPublisher.Request | SubscriptionController: {subscription}, maximum: {maximum}");
+        _delegate.Request(subscription, maximum);
+    }
+        
+    public void Cancel(SubscriptionController<T> subscription) => _delegate.Cancel(subscription);
 
-        public StreamPublisher(ISource<T> source, PublisherConfiguration configuration) =>
-            _delegate = new StreamPublisherDelegate<T>(source, configuration, SelfAs<IControlledSubscription<T>>(),
-                Scheduler, SelfAs<IScheduled<object>>(), SelfAs<IStoppable>());
+    //===================================
+    // Publisher
+    //===================================
         
-        //===================================
-        // Scheduled
-        //===================================
-        
-        public void IntervalSignal(IScheduled<object> scheduled, object data) => _delegate.ProcessNext();
-
-        //===================================
-        // ControlledSubscription
-        //===================================
-        
-        public void Request(SubscriptionController<T> subscription, long maximum)
+    public void Subscribe(ISubscriber<T>? subscriber)
+    {
+        //Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
+        if (subscriber != null)
         {
-            //Console.WriteLine($"{GetType()} : {nameof(Request)}");
-            //Console.WriteLine($"StreamPublisher.Request | SubscriptionController: {subscription}, maximum: {maximum}");
-            _delegate.Request(subscription, maximum);
+            _delegate.Subscribe(subscriber);
         }
-        
-        public void Cancel(SubscriptionController<T> subscription) => _delegate.Cancel(subscription);
+    }
 
-        //===================================
-        // Publisher
-        //===================================
+    //===================================
+    // Internal implementation
+    //===================================
         
-        public void Subscribe(ISubscriber<T>? subscriber)
-        {
-            //Console.WriteLine($"{GetType()} : {nameof(Subscribe)}");
-            if (subscriber != null)
-            {
-                _delegate.Subscribe(subscriber);
-            }
-        }
+    public override void Stop()
+    {
+        _delegate.Stop();
 
-        //===================================
-        // Internal implementation
-        //===================================
-        
-        public override void Stop()
-        {
-            _delegate.Stop();
-
-            base.Stop();
-        }
+        base.Stop();
     }
 }

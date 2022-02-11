@@ -7,29 +7,28 @@
 
 using System.Text;
 
-namespace Vlingo.Xoom.Streams.Tests.Source
+namespace Vlingo.Xoom.Streams.Tests.Source;
+
+public abstract class SourceTest
 {
-    public abstract class SourceTest
+    private readonly StringBuilder _builder = new StringBuilder();
+
+    protected string StringFromSource(ISource<string> source)
     {
-        private readonly StringBuilder _builder = new StringBuilder();
-
-        protected string StringFromSource(ISource<string> source)
+        var current = "";
+        while (current != null)
         {
-            var current = "";
-            while (current != null)
-            {
-                var elements = source
-                    .Next()
-                    .Await();
+            var elements = source
+                .Next()
+                .Await();
 
-                current = elements.ElementAt(0);
+            current = elements.ElementAt(0);
 
-                if (current != null)
-                    _builder.Append(current);
-            }
-
-            var result = _builder.ToString();
-            return result;
+            if (current != null)
+                _builder.Append(current);
         }
+
+        var result = _builder.ToString();
+        return result;
     }
 }

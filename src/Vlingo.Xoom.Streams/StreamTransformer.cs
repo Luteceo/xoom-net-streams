@@ -8,14 +8,13 @@
 using Vlingo.Xoom.Actors;
 using Vlingo.Xoom.Common;
 
-namespace Vlingo.Xoom.Streams
+namespace Vlingo.Xoom.Streams;
+
+public class StreamTransformer<T, TR> : Actor, ITransformer<T, TR>
 {
-    public class StreamTransformer<T, TR> : Actor, ITransformer<T, TR>
-    {
-        private readonly ITransformer<T, TR> _transformer;
+    private readonly ITransformer<T, TR> _transformer;
 
-        public StreamTransformer(ITransformer<T, TR> transformer) => _transformer = transformer;
+    public StreamTransformer(ITransformer<T, TR> transformer) => _transformer = transformer;
 
-        public ICompletes<TR> Transform(T value) => _transformer.Transform(value);
-    }
+    public ICompletes<TR> Transform(T value) => _transformer.Transform(value);
 }

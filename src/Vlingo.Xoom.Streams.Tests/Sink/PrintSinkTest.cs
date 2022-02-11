@@ -11,65 +11,64 @@ using System.Text;
 using Vlingo.Xoom.Streams.Sink;
 using Xunit;
 
-namespace Vlingo.Xoom.Streams.Tests.Sink
+namespace Vlingo.Xoom.Streams.Tests.Sink;
+
+public class PrintSinkTest : IDisposable
 {
-    public class PrintSinkTest : IDisposable
+    private readonly MemoryStream _byteStream;
+    private readonly StreamWriter _printStream;
+
+    public PrintSinkTest()
     {
-        private readonly MemoryStream _byteStream;
-        private readonly StreamWriter _printStream;
+        _byteStream = new MemoryStream();
+        _printStream = new StreamWriter(_byteStream);
+    }
 
-        public PrintSinkTest()
-        {
-            _byteStream = new MemoryStream();
-            _printStream = new StreamWriter(_byteStream);
-        }
+    [Fact]
+    public void TestThatSinkPrintsToStream()
+    {
+        var sink = new PrintSink<string>(_printStream, "");
 
-        [Fact]
-        public void TestThatSinkPrintsToStream()
-        {
-            var sink = new PrintSink<string>(_printStream, "");
+        sink.WhenValue("A");
+        sink.WhenValue("B");
+        sink.WhenValue("C");
 
-            sink.WhenValue("A");
-            sink.WhenValue("B");
-            sink.WhenValue("C");
+        Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
+    }
 
-            Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
-        }
+    [Fact]
+    public void TestThatSinkPrintsWithPrefixToStream()
+    {
+        var sink = Sink<string>.PrintTo(_printStream, "-");
 
-        [Fact]
-        public void TestThatSinkPrintsWithPrefixToStream()
-        {
-            var sink = Sink<string>.PrintTo(_printStream, "-");
+        sink.WhenValue("A");
+        sink.WhenValue("B");
+        sink.WhenValue("C");
 
-            sink.WhenValue("A");
-            sink.WhenValue("B");
-            sink.WhenValue("C");
+        Assert.Equal($"-A{Environment.NewLine}-B{Environment.NewLine}-C{Environment.NewLine}", PrintString());
+    }
 
-            Assert.Equal($"-A{Environment.NewLine}-B{Environment.NewLine}-C{Environment.NewLine}", PrintString());
-        }
+    [Fact]
+    public void TestThatTerminatedSinkDoesNotPrint()
+    {
+        var sink = new PrintSink<string>(_printStream, "");
 
-        [Fact]
-        public void TestThatTerminatedSinkDoesNotPrint()
-        {
-            var sink = new PrintSink<string>(_printStream, "");
+        sink.WhenValue("A");
+        sink.WhenValue("B");
+        sink.WhenValue("C");
 
-            sink.WhenValue("A");
-            sink.WhenValue("B");
-            sink.WhenValue("C");
+        sink.Terminate();
 
-            sink.Terminate();
+        sink.WhenValue("D");
 
-            sink.WhenValue("D");
+        Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
+    }
 
-            Assert.Equal($"A{Environment.NewLine}B{Environment.NewLine}C{Environment.NewLine}", PrintString());
-        }
+    public void Dispose() => _byteStream?.Dispose();
 
-        public void Dispose() => _byteStream?.Dispose();
-
-        private string PrintString()
-        {
-            _printStream.Flush();
-            return Encoding.UTF8.GetString(_byteStream.ToArray());
-        }
+    private string PrintString()
+    {
+        _printStream.Flush();
+        return Encoding.UTF8.GetString(_byteStream.ToArray());
     }
 }

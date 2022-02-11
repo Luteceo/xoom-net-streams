@@ -7,23 +7,22 @@
 
 using System;
 
-namespace Vlingo.Xoom.Streams.Sink
-{
-    public class TerminalOperationConsumerSink<T, TO> : ConsumerSink<T>
-    {
-        private readonly Action<TO> _terminalOperation;
-        private readonly TO _terminalValue;
-        
-        public TerminalOperationConsumerSink(Action<T> consumer, TO terminalValue, Action<TO> terminalOperation) : base(consumer)
-        {
-            _terminalOperation = terminalOperation;
-            _terminalValue = terminalValue;
-        }
+namespace Vlingo.Xoom.Streams.Sink;
 
-        public override void Terminate()
-        {
-            base.Terminate();
-            _terminalOperation(_terminalValue);
-        }
+public class TerminalOperationConsumerSink<T, TO> : ConsumerSink<T>
+{
+    private readonly Action<TO> _terminalOperation;
+    private readonly TO _terminalValue;
+        
+    public TerminalOperationConsumerSink(Action<T> consumer, TO terminalValue, Action<TO> terminalOperation) : base(consumer)
+    {
+        _terminalOperation = terminalOperation;
+        _terminalValue = terminalValue;
+    }
+
+    public override void Terminate()
+    {
+        base.Terminate();
+        _terminalOperation(_terminalValue);
     }
 }

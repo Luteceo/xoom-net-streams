@@ -7,44 +7,43 @@
 
 using System;
 
-namespace Vlingo.Xoom.Streams.Operator
+namespace Vlingo.Xoom.Streams.Operator;
+
+public class FlatMapper<T, TR> : Operator<T, TR>
 {
-    public class FlatMapper<T, TR> : Operator<T, TR>
+    private readonly Func<T, ISource<TR>> _mapper;
+    private const int MaximumBuffer = 32;
+
+    public FlatMapper(Func<T, ISource<TR>> mapper) => _mapper = mapper;
+
+    public override void PerformInto(T value, Action<TR> consumer)
     {
-        private readonly Func<T, ISource<TR>> _mapper;
-        private const int MaximumBuffer = 32;
-
-        public FlatMapper(Func<T, ISource<TR>> mapper) => _mapper = mapper;
-
-        public override void PerformInto(T value, Action<TR> consumer)
+        try
         {
-            try
-            {
-                var result = _mapper.Invoke(value);
-                PropagateSource(result, consumer);
-            }
-            catch (Exception e)
-            {
-                Streams.Logger.Error($"FlatMapper failed because: {e.Message}", e);
-            }
+            var result = _mapper.Invoke(value);
+            PropagateSource(result, consumer);
         }
-
-        private static void PropagateSource(ISource<TR> source, Action<TR> consumer)
+        catch (Exception e)
         {
-            source
-                .Next(MaximumBuffer)
-                .AndThenConsume(elements =>
+            Streams.Logger.Error($"FlatMapper failed because: {e.Message}", e);
+        }
+    }
+
+    private static void PropagateSource(ISource<TR> source, Action<TR> consumer)
+    {
+        source
+            .Next(MaximumBuffer)
+            .AndThenConsume(elements =>
+            {
+                foreach (var element in elements.Values)
                 {
-                    foreach (var element in elements.Values)
-                    {
-                        consumer.Invoke(element);
-                    }
+                    consumer.Invoke(element);
+                }
 
-                    if (!elements.IsTerminated)
-                    {
-                        PropagateSource(source, consumer);
-                    }
-                });
-        }
+                if (!elements.IsTerminated)
+                {
+                    PropagateSource(source, consumer);
+                }
+            });
     }
 }
